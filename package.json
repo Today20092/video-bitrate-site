@@ -1,15 +1,17 @@
 {
   "name": "video-bitrate-calculator",
   "version": "1.0.0",
-  "description": "Video Bitrate Calculator with Material Design 3",
+  "description": "Video Bitrate Calculator with Astro and Tailwind CSS",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "tailwind": "tailwindcss -i ./src/styles/globals.css -o ./dist/tailwind.css --watch"
   },
   "devDependencies": {
-    "vite": "^5.0.0"
+    "astro": "^5.0.0",
+    "tailwindcss": "^3.4.0"
   },
   "dependencies": {
     "@material/web": "^2.0.0"
