@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Bitrate Calculator | Material 3</title>
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Import Map for No-Build Support -->
+
+
+    <!-- Material Web Components via ESM -->
+    <script type="importmap">
+    {
+      "imports": {
+        "@material/web/": "https://esm.run/@material/web/"
+      }
+    }
+    </script>
+  <script type="module" crossorigin src="./assets/index-ClT1iM91.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-DGZ-Qv4o.css">
+</head>
+<body class="dark-theme">
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="header-bar px-6 h-20 flex items-center justify-between sticky top-0 z-50">
+            <div class="flex items-center gap-4">
+                <div class="md3-icon-container">
+                    <span class="material-symbols-outlined text-white text-2xl">calculate</span>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">Bitrate Calculator</h1>
+                    <p class="text-[10px] uppercase tracking-widest opacity-60 font-medium">Material Design 3 Edition</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <md-icon-button id="themeToggle" aria-label="Toggle Theme">
+                    <md-icon id="iconSun">light_mode</md-icon>
+                    <md-icon id="iconMoon" style="display:none">dark_mode</md-icon>
+                </md-icon-button>
+                <md-icon-button id="shareConfig" aria-label="Share Configuration">
+                    <md-icon>share</md-icon>
+                </md-icon-button>
+            </div>
+        </header>
+
+        <main class="flex-grow p-4 lg:p-8 max-w-7xl mx-auto w-full">
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+                
+                <!-- Left Column: Inputs -->
+                <div class="xl:col-span-4 space-y-6">
+                    <!-- Duration -->
+                    <section class="md3-card">
+                        <h2 class="md3-card-title">
+                            <span class="material-symbols-outlined">schedule</span>
+                            Video Duration
+                        </h2>
+                        <div class="grid grid-cols-3 gap-3">
+                            <md-outlined-text-field id="hours" label="Hours" type="number" value="0" min="0"></md-outlined-text-field>
+                            <md-outlined-text-field id="minutes" label="Min" type="number" value="10" min="0"></md-outlined-text-field>
+                            <md-outlined-text-field id="seconds" label="Sec" type="number" value="0" min="0"></md-outlined-text-field>
+                        </div>
+                    </section>
+
+                    <!-- Parameters -->
+                    <section class="md3-card">
+                        <div class="flex items-center justify-between mb-5">
+                            <h2 class="md3-card-title m-0">
+                                <span class="material-symbols-outlined">speed</span>
+                                Primary Inputs
+                            </h2>
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs font-bold opacity-40 uppercase tracking-tighter">Reverse</span>
+                                <md-switch id="reverseMode"></md-switch>
+                            </div>
+                        </div>
+
+                        <div class="space-y-5">
+                            <div class="bitrate-only">
+                                <md-outlined-text-field id="baselineBitrate" label="Baseline Bitrate (Mbps)" type="number" value="100" min="1" class="w-full"></md-outlined-text-field>
+                                <p id="suggestionText" class="suggestion-inline text-sm font-medium opacity-70 mt-3">Adjust settings for a recommendation</p>
+                                <md-filled-tonal-button id="applySuggestionBtn" class="w-full mt-3 hidden">
+                                    <md-icon slot="icon">check_circle</md-icon>
+                                    Apply Suggested
+                                </md-filled-tonal-button>
+                                <div class="mt-4">
+                                    <div class="text-[10px] uppercase font-bold opacity-40 mb-3 tracking-widest">Platform Presets</div>
+                                    <md-chip-set class="preset-chip-set">
+                                        <md-filter-chip label="Youtube 4K" data-bitrate="45" data-audio="128"></md-filter-chip>
+                                        <md-filter-chip label="Twitch 1080p" data-bitrate="6" data-audio="160"></md-filter-chip>
+                                        <md-filter-chip label="ProRes 422" data-bitrate="589" data-audio="1536"></md-filter-chip>
+                                    </md-chip-set>
+                                </div>
+                            </div>
+
+                            <div class="reverse-only hidden space-y-4">
+                                <div class="flex gap-2">
+                                    <md-outlined-text-field id="targetSize" label="Target Size" type="number" value="5" class="flex-grow"></md-outlined-text-field>
+                                    <md-outlined-select id="targetSizeUnit" style="min-width: 110px;">
+                                        <md-select-option value="GB" selected><div slot="headline">GB</div></md-select-option>
+                                        <md-select-option value="MB"><div slot="headline">MB</div></md-select-option>
+                                        <md-select-option value="TB"><div slot="headline">TB</div></md-select-option>
+                                    </md-outlined-select>
+                                </div>
+                                <div class="bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] p-5 rounded-3xl flex items-center justify-between shadow-sm">
+                                    <span class="text-sm font-bold uppercase tracking-tight opacity-80">Calculated Bitrate</span>
+                                    <span id="calculatedReverseBitrate" class="text-2xl font-black">--</span>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <md-outlined-text-field id="audioBitrate" label="Audio (kbps)" type="number" value="192"></md-outlined-text-field>
+                                <md-outlined-text-field id="availableStorage" label="Storage (GB)" type="number" value="500"></md-outlined-text-field>
+                            </div>
+                            <md-outlined-text-field id="costPerTB" label="Cost per TB ($)" type="number" value="20" class="w-full"></md-outlined-text-field>
+                        </div>
+                    </section>
+
+                    <!-- Recommendation Controls -->
+                    <section class="md3-card">
+                        <h2 class="md3-card-title">
+                             <span class="material-symbols-outlined text-[var(--md-sys-color-primary)]">auto_awesome</span>
+                             Recommendation
+                        </h2>
+                        <div class="space-y-4">
+                            <div class="suggestion-grid">
+                                <md-outlined-select id="resolution" label="Resolution">
+                                    <md-select-option value="720p"><div slot="headline">720p</div></md-select-option>
+                                    <md-select-option value="1080p" selected><div slot="headline">1080p</div></md-select-option>
+                                    <md-select-option value="4K"><div slot="headline">4K</div></md-select-option>
+                                </md-outlined-select>
+                                <md-outlined-select id="fps" label="FPS">
+                                    <md-select-option value="30" selected><div slot="headline">30 fps</div></md-select-option>
+                                    <md-select-option value="60"><div slot="headline">60 fps</div></md-select-option>
+                                </md-outlined-select>
+                            </div>
+                            <md-outlined-select id="complexity" label="Bitrate Quality" class="w-full">
+                                <md-select-option value="low"><div slot="headline">Efficiency (Low)</div></md-select-option>
+                                <md-select-option value="med" selected><div slot="headline">Standard (Med)</div></md-select-option>
+                                <md-select-option value="high"><div slot="headline">High Quality</div></md-select-option>
+                            </md-outlined-select>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Right Column -->
+                <div class="xl:col-span-8 space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="md3-card flex flex-col justify-center items-center text-center py-10 bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)]">
+                            <div class="text-[10px] uppercase tracking-widest font-black opacity-40 mb-2">Total Duration</div>
+                            <div id="totalDuration" class="text-6xl font-black">0s</div>
+                        </div>
+                        <div class="md3-card flex flex-col justify-center items-center text-center py-10">
+                            <md-filled-tonal-button id="addProfile" class="mb-4">
+                                <md-icon slot="icon">add</md-icon>
+                                Add Comparison
+                            </md-filled-tonal-button>
+                            <div class="text-xs font-bold opacity-40 uppercase"><span id="profileCount">0</span> active profiles</div>
+                        </div>
+                    </div>
+
+                    <div id="profilesContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+
+                    <section class="md3-card">
+                        <div class="flex items-center justify-between mb-8">
+                            <h2 class="md3-card-title m-0">Storage Comparison</h2>
+                            <md-icon-button id="exportBtn" title="Export CSV">
+                                <md-icon>download</md-icon>
+                            </md-icon-button>
+                        </div>
+                        <div id="barChart" class="space-y-6"></div>
+                    </section>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <section class="md3-card overflow-hidden">
+                            <h2 class="md3-card-title">Upload Estimates</h2>
+                            <div class="overflow-x-auto">
+                                <table class="md3-table w-full text-left">
+                                    <thead>
+                                        <tr><th>Label</th><th>Size</th><th>20M</th><th>100M</th><th>1G</th><th id="customSpeedHeader">@ 50M</th></tr>
+                                    </thead>
+                                    <tbody id="uploadTable"></tbody>
+                                </table>
+                            </div>
+                            <div class="mt-6 pt-6 border-t border-[var(--md-sys-color-outline-variant)]">
+                                <md-outlined-text-field id="customSpeed" label="Custom Speed (Mbps)" type="number" value="50" class="w-full"></md-outlined-text-field>
+                            </div>
+                        </section>
+
+                        <section class="md3-card">
+                            <h2 class="md3-card-title">Storage Yield</h2>
+                            <div id="capacityResults" class="space-y-4"></div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="p-10 text-center opacity-30 text-[10px] font-black uppercase tracking-widest mt-auto">
+            Bitrate Calculator &bull; Material Web Components &bull; 2024
+        </footer>
+
+        <div id="toast" class="md3-snackbar">
+            <span class="mr-6">Link copied to clipboard</span>
+            <md-text-button onclick="this.parentElement.classList.remove('show')">Dismiss</md-text-button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="sw.js"></script>
+</body>
+</html>
