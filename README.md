@@ -61,7 +61,7 @@ npm run preview
 1. **Ensure GitHub Pages is enabled** in your repository settings (Settings → Pages)
 2. **Set deployment source** to "GitHub Actions"
 3. **Push to main branch**
-4. GitHub Actions will automatically build and deploy to `https://haithumalqahaf.github.io/video-bitrate-site`
+4. GitHub Actions will automatically build and deploy to `https://today20092.github.io/video-bitrate-site`
 
 The deployment workflow is configured in `.github/workflows/deploy.yml`
 
@@ -77,8 +77,8 @@ npm run build
 ### Site URL
 Update `astro.config.mjs` if deploying to a different URL:
 ```javascript
-site: 'https://your-domain.com/',
-base: '/your-repo-name',
+site: 'https://today20092.github.io',
+base: '/video-bitrate-site',
 ```
 
 ### Tailwind CSS

@@ -21,7 +21,7 @@ const { title } = Astro.props;
 
     <script is:inline>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/video-bitrate-site/sw.js', { updateViaCache: 'none' });
+        navigator.serviceWorker.register(new URL('sw.js', document.baseURI), { updateViaCache: 'none' });
       }
     </script>
   </head>
