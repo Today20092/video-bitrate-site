@@ -1,196 +1,247 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import appScriptUrl from '../scripts/app.js?url';
 ---
 
-<Layout title="Video Bitrate Calculator | Material 3">
-  <div class="min-h-screen flex flex-col">
-    <!-- Header -->
-    <header class="header-bar px-6 h-20 flex items-center justify-between sticky top-0 z-50">
-      <div class="flex items-center gap-4">
-        <div class="md3-icon-container">
-          <span class="material-symbols-outlined text-white text-2xl">calculate</span>
+<Layout title="Bitrate Compare — Video File Size Calculator">
+  <div class="app-shell">
+    <header class="header-bar">
+      <div class="header-inner">
+        <div class="header-left">
+          <div class="logo-mark">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div>
+            <span class="header-title">Bitrate Compare</span>
+            <p class="header-subtitle">Plan storage, transfer time, and media cost before you roll cameras.</p>
+          </div>
         </div>
-        <div>
-          <h1 class="text-xl font-bold tracking-tight">Bitrate Calculator</h1>
-          <p class="text-[10px] uppercase tracking-widest opacity-60 font-medium">Material Design 3 Edition</p>
+        <div class="header-right">
+          <button id="themeToggle" class="btn-icon" aria-label="Toggle theme">
+            <svg id="iconSun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+            <svg id="iconMoon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+              <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+            </svg>
+          </button>
+          <button id="shareConfig" class="btn-icon" aria-label="Share configuration">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
+            </svg>
+          </button>
         </div>
-      </div>
-      <div class="flex items-center gap-2">
-        <md-icon-button id="themeToggle" aria-label="Toggle Theme">
-          <md-icon id="iconSun">light_mode</md-icon>
-          <md-icon id="iconMoon" style="display:none">dark_mode</md-icon>
-        </md-icon-button>
-        <md-icon-button id="shareConfig" aria-label="Share Configuration">
-          <md-icon>share</md-icon>
-        </md-icon-button>
       </div>
     </header>
 
-    <main class="flex-grow p-4 lg:p-8 max-w-7xl mx-auto w-full">
-      <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
-
-        <!-- Left Column: Inputs -->
-        <div class="xl:col-span-4 space-y-6">
-          <!-- Duration -->
-          <section class="md3-card">
-            <h2 class="md3-card-title">
-              <span class="material-symbols-outlined">schedule</span>
-              Video Duration
-            </h2>
-            <div class="grid grid-cols-3 gap-3">
-              <md-outlined-text-field id="hours" label="Hours" type="number" value="0" min="0"></md-outlined-text-field>
-              <md-outlined-text-field id="minutes" label="Min" type="number" value="10" min="0"></md-outlined-text-field>
-              <md-outlined-text-field id="seconds" label="Sec" type="number" value="0" min="0"></md-outlined-text-field>
-            </div>
-          </section>
-
-          <!-- Parameters -->
-          <section class="md3-card">
-            <div class="flex items-center justify-between mb-6">
-              <h2 class="md3-card-title m-0">
-                <span class="material-symbols-outlined">speed</span>
-                Parameters
-              </h2>
-              <div class="flex items-center gap-3">
-                <span class="text-xs font-bold opacity-40 uppercase tracking-tighter">Reverse</span>
-                <md-switch id="reverseMode"></md-switch>
-              </div>
-            </div>
-
-            <div class="space-y-6">
-              <div class="bitrate-only">
-                <md-outlined-text-field id="baselineBitrate" label="Baseline Bitrate (Mbps)" type="number" value="100" min="1" class="w-full"></md-outlined-text-field>
-
-                <div class="mt-4">
-                  <div class="text-[10px] uppercase font-bold opacity-40 mb-3 tracking-widest">Platform Presets</div>
-                  <md-chip-set>
-                    <md-filter-chip label="Youtube 4K" data-bitrate="45" data-audio="128"></md-filter-chip>
-                    <md-filter-chip label="Twitch 1080p" data-bitrate="6" data-audio="160"></md-filter-chip>
-                    <md-filter-chip label="ProRes 422" data-bitrate="589" data-audio="1536"></md-filter-chip>
-                  </md-chip-set>
-                </div>
-              </div>
-
-              <div class="reverse-only hidden space-y-4">
-                <div class="flex gap-2">
-                  <md-outlined-text-field id="targetSize" label="Target Size" type="number" value="5" class="flex-grow"></md-outlined-text-field>
-                  <md-outlined-select id="targetSizeUnit" style="min-width: 110px;">
-                    <md-select-option value="GB" selected><div slot="headline">GB</div></md-select-option>
-                    <md-select-option value="MB"><div slot="headline">MB</div></md-select-option>
-                    <md-select-option value="TB"><div slot="headline">TB</div></md-select-option>
-                  </md-outlined-select>
-                </div>
-                <div class="bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] p-5 rounded-3xl flex items-center justify-between shadow-sm">
-                  <span class="text-sm font-bold uppercase tracking-tight opacity-80">Calculated Bitrate</span>
-                  <span id="calculatedReverseBitrate" class="text-2xl font-black">--</span>
-                </div>
-              </div>
-
-              <div class="grid grid-cols-2 gap-3">
-                <md-outlined-text-field id="audioBitrate" label="Audio (kbps)" type="number" value="192"></md-outlined-text-field>
-                <md-outlined-text-field id="availableStorage" label="Storage (GB)" type="number" value="500"></md-outlined-text-field>
-              </div>
-              <md-outlined-text-field id="costPerTB" label="Cost per TB ($)" type="number" value="20" class="w-full"></md-outlined-text-field>
-            </div>
-          </section>
-
-          <!-- Smart Suggester -->
-          <section class="md3-card bg-[var(--md-sys-color-surface-container-high)]">
-            <h2 class="md3-card-title">
-              <span class="material-symbols-outlined text-[var(--md-sys-color-primary)]">auto_awesome</span>
-              Smart Suggest
-            </h2>
-            <div class="space-y-4">
-              <div class="suggestion-grid">
-                <md-outlined-select id="resolution" label="Resolution">
-                  <md-select-option value="720p"><div slot="headline">720p</div></md-select-option>
-                  <md-select-option value="1080p" selected><div slot="headline">1080p</div></md-select-option>
-                  <md-select-option value="4K"><div slot="headline">4K</div></md-select-option>
-                </md-outlined-select>
-                <md-outlined-select id="fps" label="FPS">
-                  <md-select-option value="30" selected><div slot="headline">30 fps</div></md-select-option>
-                  <md-select-option value="60"><div slot="headline">60 fps</div></md-select-option>
-                </md-outlined-select>
-              </div>
-              <md-outlined-select id="complexity" label="Bitrate Quality" class="w-full">
-                <md-select-option value="low"><div slot="headline">Efficiency (Low)</div></md-select-option>
-                <md-select-option value="med" selected><div slot="headline">Standard (Med)</div></md-select-option>
-                <md-select-option value="high"><div slot="headline">High Quality</div></md-select-option>
-              </md-outlined-select>
-
-              <div class="p-5 rounded-2xl border border-[var(--md-sys-color-outline-variant)] bg-black/10">
-                <p id="suggestionText" class="text-sm font-medium opacity-60 mb-4">Adjust settings for a recommendation</p>
-                <md-filled-button id="applySuggestionBtn" class="w-full hidden">
-                  <md-icon slot="icon">check_circle</md-icon>
-                  Apply Suggested
-                </md-filled-button>
-              </div>
-            </div>
-          </section>
+    <main class="main-content">
+      <section class="hero-panel card">
+        <div class="hero-copy">
+          <span class="eyebrow">Production planning</span>
+          <h1 class="hero-title">Compare recording profiles fast.</h1>
+          <p class="hero-text">Set a duration, add camera presets or manual bitrates, and compare file size, storage yield, and upload time.</p>
         </div>
-
-        <!-- Right Column -->
-        <div class="xl:col-span-8 space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="md3-card flex flex-col justify-center items-center text-center py-10 bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)]">
-              <div class="text-[10px] uppercase tracking-widest font-black opacity-40 mb-2">Total Duration</div>
-              <div id="totalDuration" class="text-6xl font-black">0s</div>
-            </div>
-            <div class="md3-card flex flex-col justify-center items-center text-center py-10">
-              <md-filled-tonal-button id="addProfile" class="mb-4">
-                <md-icon slot="icon">add</md-icon>
-                Add Comparison
-              </md-filled-tonal-button>
-              <div class="text-xs font-bold opacity-40 uppercase"><span id="profileCount">0</span> active profiles</div>
-            </div>
+        <div class="hero-notes" aria-label="How it works">
+          <div class="hero-note">
+            <span class="hero-note-step">1</span>
+            <p>Set total record time.</p>
           </div>
-
-          <div id="profilesContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-
-          <section class="md3-card">
-            <div class="flex items-center justify-between mb-8">
-              <h2 class="md3-card-title m-0">Storage Comparison</h2>
-              <md-icon-button id="exportBtn" title="Export CSV">
-                <md-icon>download</md-icon>
-              </md-icon-button>
-            </div>
-            <div id="barChart" class="space-y-6"></div>
-          </section>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <section class="md3-card overflow-hidden">
-              <h2 class="md3-card-title">Upload Estimates</h2>
-              <div class="overflow-x-auto">
-                <table class="md3-table w-full text-left">
-                  <thead>
-                    <tr><th>Label</th><th>Size</th><th>20M</th><th>100M</th><th>1G</th><th id="customSpeedHeader">@ 50M</th></tr>
-                  </thead>
-                  <tbody id="uploadTable"></tbody>
-                </table>
-              </div>
-              <div class="mt-6 pt-6 border-t border-[var(--md-sys-color-outline-variant)]">
-                <md-outlined-text-field id="customSpeed" label="Custom Speed (Mbps)" type="number" value="50" class="w-full"></md-outlined-text-field>
-              </div>
-            </section>
-
-            <section class="md3-card">
-              <h2 class="md3-card-title">Storage Yield</h2>
-              <div id="capacityResults" class="space-y-4"></div>
-            </section>
+          <div class="hero-note">
+            <span class="hero-note-step">2</span>
+            <p>Add one or more profiles.</p>
+          </div>
+          <div class="hero-note">
+            <span class="hero-note-step">3</span>
+            <p>Use the first row as your baseline comparison.</p>
           </div>
         </div>
-      </div>
+      </section>
+
+      <!-- Duration -->
+      <section class="card">
+        <div class="section-header">
+          <span class="section-label">Shoot Duration</span>
+          <span id="totalDuration" class="duration-badge">0s</span>
+        </div>
+        <p class="helper-text section-intro">Set the total record time for a single card, interview, or shooting day.</p>
+        <div class="duration-grid">
+          <div>
+            <label class="field-label" for="hours">Hours</label>
+            <input id="hours" type="number" class="input-field input-center" value="0" min="0" placeholder="0" inputmode="numeric" />
+          </div>
+          <div>
+            <label class="field-label" for="minutes">Minutes</label>
+            <input id="minutes" type="number" class="input-field input-center" value="10" min="0" placeholder="0" inputmode="numeric" />
+          </div>
+          <div>
+            <label class="field-label" for="seconds">Seconds</label>
+            <input id="seconds" type="number" class="input-field input-center" value="0" min="0" placeholder="0" inputmode="numeric" />
+          </div>
+        </div>
+        <p id="durationHint" class="helper-text">Need a quick estimate? Start with the planned runtime of the scene, interview, or full shooting block.</p>
+      </section>
+
+      <!-- Add Profile -->
+      <section class="card">
+        <div class="section-header section-header-tight">
+          <span class="section-label">Recording Profiles</span>
+          <span class="section-kicker">Add presets or manual targets</span>
+        </div>
+        <p class="helper-text section-intro">Use real camera presets when possible. Manual mode is useful for proxies, mezzanine exports, or delivery targets.</p>
+        <div class="tab-group" role="tablist" aria-label="Add profile mode">
+          <button id="modeCameraBtn" class="tab-btn active" type="button" role="tab" aria-selected="true" aria-controls="cameraMode">Camera Preset</button>
+          <button id="modeManualBtn" class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="manualMode">Manual</button>
+        </div>
+
+        <div id="cameraMode" class="stack-sm" role="tabpanel" aria-labelledby="modeCameraBtn">
+          <label class="field-label" for="cameraSelect">Camera</label>
+          <select id="cameraSelect" class="select-field" name="cameraSelect" autocomplete="off" aria-describedby="cameraPresetHint">
+            <option value="">Choose a camera...</option>
+          </select>
+          <p id="cameraPresetHint" class="helper-text">Pick a camera first, then choose its recording preset.</p>
+          <label class="field-label" for="codecSelect">Codec / Bitrate</label>
+          <select id="codecSelect" class="select-field" name="codecSelect" autocomplete="off" style="display:none">
+            <option value="">Choose codec / bitrate...</option>
+          </select>
+          <button id="addCameraProfile" class="btn-primary btn-full" type="button" style="display:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add to Comparison
+          </button>
+        </div>
+
+        <div id="manualMode" style="display:none" class="stack-sm" role="tabpanel" aria-labelledby="modeManualBtn">
+          <div>
+            <label class="field-label" for="manualName">Profile Name</label>
+            <input id="manualName" name="manualName" type="text" class="input-field" placeholder="Example: ProRes 422 HQ" autocomplete="off" aria-describedby="manualProfileHelp" />
+          </div>
+          <div>
+            <label class="field-label" for="manualBitrate">Bitrate (Mbps)</label>
+            <div class="manual-entry-row">
+              <input id="manualBitrate" name="manualBitrate" type="number" class="input-field" value="100" min="1" step="0.1" inputmode="decimal" aria-describedby="manualProfileHelp manualValidation" />
+              <button id="addManualProfile" class="btn-primary" type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Profile
+              </button>
+            </div>
+          </div>
+          <div class="chip-row" aria-label="Quick bitrate presets">
+            <button class="chip-btn active" type="button" data-bitrate-chip="45">45 Mbps</button>
+            <button class="chip-btn" type="button" data-bitrate-chip="50">50 Mbps</button>
+            <button class="chip-btn" type="button" data-bitrate-chip="100">100 Mbps</button>
+          </div>
+          <p id="manualProfileHelp" class="helper-text">Leave the name blank to auto-label it. Rows stay editable after you add them, so you can tune names and bitrates in place.</p>
+          <p id="manualValidation" class="helper-text validation-message" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <!-- Profiles -->
+      <section id="comparisonSection" class="card" style="display:none">
+        <div class="section-header">
+          <div>
+            <span class="section-label">File Size Comparison <span id="profileCount" class="inline-count">0</span></span>
+            <p id="comparisonHint" class="helper-text helper-tight">The first row acts as the baseline for size delta.</p>
+          </div>
+          <button id="clearAll" class="clear-btn" type="button">Clear all</button>
+        </div>
+        <div class="table-scroll profile-table-scroll">
+          <table class="data-table profile-table">
+            <thead>
+              <tr>
+                <th>Profile</th>
+                <th>Bitrate</th>
+                <th>Est. Size</th>
+                <th>Delta vs 1st</th>
+                <th>Media Cost</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="profilesContainer"></tbody>
+          </table>
+        </div>
+        <p id="profilesEmpty" class="helper-text empty-state">No profiles yet. Add a camera preset or manual bitrate to compare file size, upload time, and storage yield.</p>
+      </section>
+
+      <!-- Bar Chart -->
+      <section id="chartSection" class="card" style="display:none">
+        <div class="section-header section-header-tight">
+          <span class="section-label">Size Comparison</span>
+          <span class="section-kicker">Visual size spread</span>
+        </div>
+        <p class="helper-text section-intro">Bars scale relative to the largest file size in your current comparison.</p>
+        <div id="barChart" style="margin-top:8px"></div>
+      </section>
+
+      <!-- Settings -->
+      <section class="card">
+        <div class="section-header section-header-tight">
+          <span class="section-label">Planning Assumptions</span>
+          <span class="section-kicker">Storage and transfer</span>
+        </div>
+        <p class="helper-text section-intro">Adjust these assumptions to estimate media cost per profile and total recording time per drive.</p>
+        <div class="settings-grid">
+          <div>
+            <label class="field-label" for="availableStorage">Available Storage (GB)</label>
+            <input id="availableStorage" name="availableStorage" type="number" class="input-field" value="500" min="0" step="1" inputmode="numeric" />
+          </div>
+          <div>
+            <label class="field-label" for="costPerTB">Media Cost ($/TB)</label>
+            <input id="costPerTB" name="costPerTB" type="number" class="input-field" value="20" min="0" step="0.01" inputmode="decimal" />
+          </div>
+          <div>
+            <label class="field-label" for="customSpeed">Custom Upload Speed (Mbps)</label>
+            <input id="customSpeed" name="customSpeed" type="number" class="input-field" value="50" min="1" step="1" inputmode="numeric" />
+          </div>
+        </div>
+        <p id="settingsStatus" class="helper-text">Costs assume decimal TB and transfer speeds in megabits per second.</p>
+      </section>
+
+      <!-- Upload Estimates -->
+      <section id="uploadSection" class="card" style="display:none">
+        <div class="section-header section-header-tight">
+          <span class="section-label">Upload Estimates</span>
+          <span class="section-kicker">Based on full file size</span>
+        </div>
+        <p class="helper-text section-intro">Use this to spot whether dailies, proxies, or mezzanine files can move in your available window.</p>
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Profile</th>
+                <th>Size</th>
+                <th>20M</th>
+                <th>100M</th>
+                <th>1G</th>
+                <th>10G</th>
+                <th id="customSpeedHeader">50M</th>
+              </tr>
+            </thead>
+            <tbody id="uploadTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Storage Yield -->
+      <section id="yieldSection" class="card" style="display:none">
+        <div class="section-header">
+          <div>
+            <span class="section-label">Storage Yield</span>
+            <p class="helper-text helper-tight">Estimated total record time each profile gets from the storage value above.</p>
+          </div>
+          <span class="yield-badge" id="yieldStorageLabel">500 GB</span>
+        </div>
+        <div id="capacityResults" class="capacity-list"></div>
+      </section>
+
     </main>
 
-    <footer class="p-10 text-center opacity-30 text-[10px] font-black uppercase tracking-widest mt-auto">
-      Bitrate Calculator &bull; Material Web Components &bull; 2024
+    <footer class="site-footer">
+      Bitrate Compare &bull; 2025
     </footer>
 
-    <div id="toast" class="md3-snackbar">
-      <span class="mr-6">Link copied to clipboard</span>
-      <md-text-button onclick="this.parentElement.classList.remove('show')">Dismiss</md-text-button>
-    </div>
+    <div id="toast" class="toast" aria-live="polite">Link copied to clipboard</div>
   </div>
 
-  <script type="module" src="../scripts/script.js"></script>
+  <script type="module" src={appScriptUrl}></script>
 </Layout>
