@@ -10,6 +10,12 @@ import { cameras } from '../data/cameras.js';
     '#6366f1', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6',
     '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16',
   ];
+  const uploadSpeeds = [
+    { label: '20M', speed: 20 },
+    { label: '100M', speed: 100 },
+    { label: '1G', speed: 1000 },
+    { label: '10G', speed: 10000 },
+  ];
 
   const refs = {
     hoursEl: $('#hours'),
@@ -145,6 +151,14 @@ import { cameras } from '../data/cameras.js';
   function setInputInvalid(el, invalid) {
     if (!el) return;
     el.setAttribute('aria-invalid', invalid ? 'true' : 'false');
+  }
+
+  function getUploadHeatClass(uploadTimeSeconds) {
+    if (!Number.isFinite(uploadTimeSeconds) || uploadTimeSeconds <= 0) return 'upload-heatmap-cell--idle';
+    if (uploadTimeSeconds <= 60) return 'upload-heatmap-cell--fast';
+    if (uploadTimeSeconds <= 15 * 60) return 'upload-heatmap-cell--mid';
+    if (uploadTimeSeconds <= 60 * 60) return 'upload-heatmap-cell--slow';
+    return 'upload-heatmap-cell--very-slow';
   }
 
   function clampWholeNumberInput(el) {
@@ -474,18 +488,31 @@ import { cameras } from '../data/cameras.js';
       </div>`;
     }).join('');
 
-    const speeds = [20, 100, 1000, 10000, customSpeed];
-    uploadTable.innerHTML = entries.map((entry) => {
-      const cells = speeds.map(
-        (speed) => `<td class="border-t border-white/10 py-3.5 pr-3 text-zinc-400 tabular-nums light:border-zinc-200 light:text-zinc-600">${entry.size > 0 ? formatDuration(uploadSeconds(entry.size, speed)) : '--'}</td>`
-      ).join('');
+    const speedColumns = [...uploadSpeeds, { label: `${customSpeed}M`, speed: customSpeed }];
+    uploadTable.innerHTML = entries.length
+      ? entries.map((entry) => {
+        const cells = speedColumns.map((column) => {
+          const uploadTime = seconds > 0 ? uploadSeconds(entry.size, column.speed) : 0;
+          const heatClass = seconds > 0 ? getUploadHeatClass(uploadTime) : 'upload-heatmap-cell--idle';
+          const timeLabel = seconds > 0 ? formatDuration(uploadTime) : 'Set duration';
+          const ariaLabel = `${entry.label} ${column.label} ${timeLabel}`;
+          return `<div class="upload-heatmap-cell upload-heatmap-cell-speed ${heatClass}" role="cell" aria-label="${escapeHtml(ariaLabel)}" title="${escapeHtml(ariaLabel)}">
+            <span class="upload-heatmap-rate">${escapeHtml(column.label)}</span>
+            <span class="upload-heatmap-time">${escapeHtml(timeLabel)}</span>
+          </div>`;
+        }).join('');
 
-      return `<tr>
-        <td class="max-w-[150px] truncate border-t border-white/10 py-3.5 pr-3 font-semibold text-zinc-100 light:border-zinc-200 light:text-zinc-900">${escapeHtml(entry.label)}</td>
-        <td class="border-t border-white/10 py-3.5 pr-3 text-zinc-400 tabular-nums light:border-zinc-200 light:text-zinc-600">${seconds > 0 ? formatSize(entry.size) : 'Set duration'}</td>
-        ${cells}
-      </tr>`;
-    }).join('');
+        return `<div class="upload-heatmap-row" role="row">
+          <div class="upload-heatmap-cell upload-heatmap-cell-label" role="cell">
+            <span class="upload-heatmap-name">${escapeHtml(entry.label)}</span>
+          </div>
+          <div class="upload-heatmap-cell upload-heatmap-cell-size" role="cell">
+            ${seconds > 0 ? escapeHtml(formatSize(entry.size)) : 'Set duration'}
+          </div>
+          ${cells}
+        </div>`;
+      }).join('')
+      : `<div class="upload-heatmap-empty">Add profiles to see upload estimates.</div>`;
 
     capacityResults.innerHTML = entries.map((entry) => {
       const recSec = entry.bitrate > 0 ? (storageGB * 8 * 1e9) / (entry.bitrate * 1e6) : 0;
