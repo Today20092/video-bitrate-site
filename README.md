@@ -5,7 +5,7 @@ A modern video bitrate calculator built with Astro and Tailwind CSS for static d
 ## Tech Stack
 
 - **Framework**: Astro 5.x (Static Site Generation)
-- **Styling**: Tailwind CSS 3.4
+- **Styling**: Tailwind CSS 4
 - **Components**: Material Web Components 3
 - **Deployment**: GitHub Pages
 
@@ -27,7 +27,6 @@ A modern video bitrate calculator built with Astro and Tailwind CSS for static d
 │   └── sw.js                    # Service Worker
 ├── dist/                        # Build output (auto-generated)
 ├── astro.config.mjs             # Astro configuration
-└── tailwind.config.mjs          # Tailwind configuration
 ```
 
 ## Development
@@ -82,7 +81,7 @@ base: '/video-bitrate-site',
 ```
 
 ### Tailwind CSS
-Customize Tailwind in `tailwind.config.mjs`
+Tailwind v4 is configured through `src/styles/globals.css` and the Vite plugin in `astro.config.mjs`.
 
 ## Features
 
