@@ -80,8 +80,8 @@ npm run build
 ### Site URL
 Update `astro.config.mjs` if deploying to a different URL:
 ```javascript
-site: 'https://today20092.github.io',
-base: '/video-bitrate-site',
+site: 'https://today20092.github.io/video-bitrate-site/',
+base: '/video-bitrate-site/',
 ```
 
 ### Tailwind CSS

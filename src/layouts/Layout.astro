@@ -8,10 +8,13 @@ interface Props {
 
 const { title } = Astro.props;
 const description = Astro.props.description ?? 'Compare video bitrates, file sizes, storage yield, and upload time with a fast static calculator.';
-const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString();
-const ogImageUrl = new URL('og-image.svg', Astro.url).toString();
-const faviconHref = new URL('favicon.svg', Astro.url).pathname;
-const manifestHref = new URL('manifest.json', Astro.url).pathname;
+const siteUrl = Astro.site ?? Astro.url;
+const baseUrl = import.meta.env.BASE_URL;
+const canonicalPath = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : `${Astro.url.pathname}/`;
+const canonicalUrl = new URL(canonicalPath, siteUrl).toString();
+const ogImageUrl = new URL(`${baseUrl}og-image.svg`, siteUrl).toString();
+const faviconHref = `${baseUrl}favicon.svg`;
+const manifestHref = `${baseUrl}manifest.json`;
 ---
 
 <!DOCTYPE html>
