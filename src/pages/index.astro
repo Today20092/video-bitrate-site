@@ -260,7 +260,25 @@ import Layout from '../layouts/Layout.astro';
     </main>
 
     <footer class="px-4 py-4 text-center text-[10px] font-medium uppercase tracking-[0.06em] text-zinc-600 light:text-zinc-400">
-      Bitrate Compare &bull; 2025
+      <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+        <span>Bitrate Compare &bull; 2025</span>
+        <a
+          href="https://youtube.com/@alphabravomedia"
+          target="_blank"
+          rel="noreferrer"
+          class="transition hover:text-zinc-300 light:hover:text-zinc-700"
+        >
+          YouTube
+        </a>
+        <a
+          href="https://github.com/Today20092/video-bitrate-site"
+          target="_blank"
+          rel="noreferrer"
+          class="transition hover:text-zinc-300 light:hover:text-zinc-700"
+        >
+          GitHub
+        </a>
+      </div>
     </footer>
 
     <div id="toast" class="pointer-events-none fixed right-4 bottom-4 translate-y-16 rounded-2xl border border-white/10 bg-zinc-900 px-4 py-3 text-sm font-medium text-zinc-100 opacity-0 shadow-2xl transition duration-200 data-[visible=true]:translate-y-0 data-[visible=true]:opacity-100 light:border-zinc-200 light:bg-white light:text-zinc-900" data-visible="false" aria-live="polite">Link copied to clipboard</div>
