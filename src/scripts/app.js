@@ -4,6 +4,7 @@ import { cameras } from '../data/cameras.js';
   const $ = (sel) => document.querySelector(sel);
   const profiles = new Map();
   let profileIdCounter = 0;
+  let toastTimeoutId = null;
 
   const chartColors = [
     '#6366f1', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6',
@@ -103,12 +104,25 @@ import { cameras } from '../data/cameras.js';
     chipButtons,
   } = refs;
 
-  function show(el) {
-    if (el) el.style.display = '';
+  function getVisibilityTarget(el) {
+    if (el?.matches?.('select') && el.parentElement?.dataset.selectWrap !== undefined) {
+      return el.parentElement;
+    }
+    return el;
   }
 
-  function hide(el) {
-    if (el) el.style.display = 'none';
+  function show(el, displayClass = 'block') {
+    const target = getVisibilityTarget(el);
+    if (!target) return;
+    target.classList.remove('hidden');
+    if (displayClass) target.classList.add(displayClass);
+  }
+
+  function hide(el, displayClass = 'block') {
+    const target = getVisibilityTarget(el);
+    if (!target) return;
+    if (displayClass) target.classList.remove(displayClass);
+    target.classList.add('hidden');
   }
 
   function escapeHtml(str) {
@@ -131,7 +145,6 @@ import { cameras } from '../data/cameras.js';
   function setInputInvalid(el, invalid) {
     if (!el) return;
     el.setAttribute('aria-invalid', invalid ? 'true' : 'false');
-    el.classList.toggle('is-invalid', invalid);
   }
 
   function clampWholeNumberInput(el) {
@@ -182,15 +195,14 @@ import { cameras } from '../data/cameras.js';
   function applyTheme(theme) {
     const iconSun = $('#iconSun');
     const iconMoon = $('#iconMoon');
-    if (theme === 'light') {
-      document.body.classList.add('light-theme');
-      if (iconSun) iconSun.style.display = 'none';
-      if (iconMoon) iconMoon.style.display = '';
-    } else {
-      document.body.classList.remove('light-theme');
-      if (iconSun) iconSun.style.display = '';
-      if (iconMoon) iconMoon.style.display = 'none';
-    }
+    const root = document.documentElement;
+
+    root.classList.toggle('light-theme', theme === 'light');
+
+    if (iconSun) iconSun.classList.toggle('hidden', theme === 'light');
+    if (iconMoon) iconMoon.classList.toggle('hidden', theme !== 'light');
+
+    root.style.colorScheme = theme;
     localStorage.setItem('vbc-theme', theme);
   }
 
@@ -198,15 +210,11 @@ import { cameras } from '../data/cameras.js';
     const isCamera = mode === 'camera';
     cameraMode.hidden = !isCamera;
     manualMode.hidden = isCamera;
-    cameraMode.style.display = isCamera ? '' : 'none';
-    manualMode.style.display = isCamera ? 'none' : '';
-    modeCameraBtn.classList.toggle('active', isCamera);
-    modeManualBtn.classList.toggle('active', !isCamera);
+    cameraMode.classList.toggle('hidden', !isCamera);
+    manualMode.classList.toggle('hidden', isCamera);
     modeCameraBtn.setAttribute('aria-selected', String(isCamera));
     modeManualBtn.setAttribute('aria-selected', String(!isCamera));
-    if (!isCamera) {
-      validateManualProfile();
-    }
+    if (!isCamera) validateManualProfile();
   }
 
   function getTotalSeconds() {
@@ -221,9 +229,9 @@ import { cameras } from '../data/cameras.js';
   }
 
   function formatSize(gb) {
-    if (gb >= 1000) return (gb / 1000).toFixed(2) + ' TB';
-    if (gb >= 1) return gb.toFixed(2) + ' GB';
-    return (gb * 1000).toFixed(1) + ' MB';
+    if (gb >= 1000) return `${(gb / 1000).toFixed(2)} TB`;
+    if (gb >= 1) return `${gb.toFixed(2)} GB`;
+    return `${(gb * 1000).toFixed(1)} MB`;
   }
 
   function formatDuration(totalSec) {
@@ -233,10 +241,10 @@ import { cameras } from '../data/cameras.js';
     const m = Math.floor((totalSec % 3600) / 60);
     const s = Math.floor(totalSec % 60);
     const parts = [];
-    if (d > 0) parts.push(d + 'd');
-    if (h > 0) parts.push(h + 'h');
-    if (m > 0) parts.push(m + 'm');
-    if (s > 0 || parts.length === 0) parts.push(s + 's');
+    if (d > 0) parts.push(`${d}d`);
+    if (h > 0) parts.push(`${h}h`);
+    if (m > 0) parts.push(`${m}m`);
+    if (s > 0 || parts.length === 0) parts.push(`${s}s`);
     return parts.join(' ');
   }
 
@@ -245,9 +253,9 @@ import { cameras } from '../data/cameras.js';
     const m = Math.floor((totalSec % 3600) / 60);
     const s = Math.floor(totalSec % 60);
     const parts = [];
-    if (h > 0) parts.push(h + 'h');
-    if (m > 0) parts.push(m + 'm');
-    if (s > 0 && h === 0) parts.push(s + 's');
+    if (h > 0) parts.push(`${h}h`);
+    if (m > 0) parts.push(`${m}m`);
+    if (s > 0 && h === 0) parts.push(`${s}s`);
     return parts.join(' ') || '0s';
   }
 
@@ -258,7 +266,6 @@ import { cameras } from '../data/cameras.js';
   function updateChipState(activeBitrate) {
     chipButtons.forEach((btn) => {
       const isActive = parseFloat(btn.dataset.bitrateChip) === activeBitrate;
-      btn.classList.toggle('active', isActive);
       btn.setAttribute('aria-pressed', String(isActive));
     });
   }
@@ -273,13 +280,14 @@ import { cameras } from '../data/cameras.js';
 
     const row = document.createElement('tr');
     row.dataset.id = String(id);
+    row.className = 'transition hover:bg-white/[0.03] light:hover:bg-zinc-50';
     row.innerHTML = `
-      <td class="profile-name-cell">
-        <div class="profile-name-wrap">
-          <span class="profile-dot" style="background:${chartColors[(id - 1) % chartColors.length]}"></span>
+      <td class="profile-name-cell min-w-[240px] border-t border-white/10 py-3.5 pr-3 text-zinc-100 light:border-zinc-200 light:text-zinc-900">
+        <div class="flex min-w-0 items-center gap-2.5">
+          <span class="profile-dot size-2.5 shrink-0 rounded-full bg-(--profile-color)" style="--profile-color:${chartColors[(id - 1) % chartColors.length]}"></span>
           <input
             type="text"
-            class="table-input profile-name-input"
+            class="table-input profile-name-input w-full rounded-xl border border-transparent bg-white/[0.03] px-3 py-3 text-sm font-medium text-zinc-100 outline-none transition hover:border-white/10 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 aria-invalid:border-rose-400 aria-invalid:ring-2 aria-invalid:ring-rose-500/20 light:bg-zinc-100 light:text-zinc-900 light:hover:border-zinc-200"
             value="${escapeHtml(profile.name)}"
             name="profile-${id}-name"
             autocomplete="off"
@@ -287,11 +295,11 @@ import { cameras } from '../data/cameras.js';
           />
         </div>
       </td>
-      <td>
-        <div class="bitrate-input-wrap">
+      <td class="border-t border-white/10 py-3.5 pr-3 text-zinc-400 tabular-nums light:border-zinc-200 light:text-zinc-600">
+        <div class="flex items-center gap-2.5">
           <input
             type="number"
-            class="table-input bitrate-input"
+            class="table-input bitrate-input max-w-[126px] rounded-xl border border-transparent bg-white/[0.03] px-3 py-3 text-sm font-medium text-zinc-100 outline-none transition hover:border-white/10 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 aria-invalid:border-rose-400 aria-invalid:ring-2 aria-invalid:ring-rose-500/20 light:bg-zinc-100 light:text-zinc-900 light:hover:border-zinc-200"
             value="${profile.bitrate}"
             min="1"
             step="0.1"
@@ -299,15 +307,15 @@ import { cameras } from '../data/cameras.js';
             name="profile-${id}-bitrate"
             aria-label="Bitrate in megabits per second"
           />
-          <span class="table-unit">Mbps</span>
+          <span class="text-[11px] font-semibold uppercase tracking-[0.04em] text-zinc-500 light:text-zinc-500">Mbps</span>
         </div>
       </td>
-      <td class="profile-size table-metric">--</td>
-      <td class="profile-diff table-metric">--</td>
-      <td class="profile-cost table-metric">--</td>
-      <td>
-        <button class="row-action-btn remove-btn" type="button" aria-label="Remove ${escapeHtml(profile.name)}">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <td class="profile-size border-t border-white/10 py-3.5 pr-3 font-semibold text-zinc-300 tabular-nums light:border-zinc-200 light:text-zinc-700">--</td>
+      <td class="profile-diff border-t border-white/10 py-3.5 pr-3 font-semibold tabular-nums text-zinc-500 data-[trend=positive]:text-emerald-400 data-[trend=negative]:text-rose-400 light:border-zinc-200 light:text-zinc-500 light:data-[trend=positive]:text-emerald-600 light:data-[trend=negative]:text-rose-600">--</td>
+      <td class="profile-cost border-t border-white/10 py-3.5 pr-3 font-semibold text-zinc-300 tabular-nums light:border-zinc-200 light:text-zinc-700">--</td>
+      <td class="border-t border-white/10 py-3.5 pr-0 light:border-zinc-200">
+        <button class="remove-btn inline-flex size-[46px] items-center justify-center rounded-[10px] border border-white/10 text-zinc-500 transition hover:border-rose-400/40 hover:bg-rose-500/8 hover:text-rose-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400 light:border-zinc-200 light:hover:border-rose-200 light:hover:bg-rose-50 light:hover:text-rose-600" type="button" aria-label="Remove ${escapeHtml(profile.name)}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
       </td>
     `;
@@ -382,9 +390,9 @@ import { cameras } from '../data/cameras.js';
   function updateVisibility() {
     const hasProfiles = profiles.size > 0;
     [comparisonSection, chartSection, uploadSection, yieldSection].forEach((el) => {
-      el.style.display = hasProfiles ? '' : 'none';
+      el.classList.toggle('hidden', !hasProfiles);
     });
-    profilesEmptyEl.style.display = hasProfiles ? 'none' : '';
+    profilesEmptyEl.classList.toggle('hidden', hasProfiles);
     profileCountEl.textContent = String(profiles.size);
   }
 
@@ -395,8 +403,8 @@ import { cameras } from '../data/cameras.js';
     const customSpeed = Math.max(1, parseFloat(customSpeedEl.value) || 50);
 
     totalDurationEl.textContent = formatDurationShort(seconds);
-    customSpeedHeader.textContent = customSpeed + 'M';
-    yieldStorageLabel.textContent = storageGB + ' GB';
+    customSpeedHeader.textContent = `${customSpeed}M`;
+    yieldStorageLabel.textContent = `${storageGB} GB`;
 
     if (seconds === 0) {
       setMessage(profilesEmptyEl, 'Set a duration above 0 seconds to generate file sizes, upload times, and storage yield.', 'warning');
@@ -444,13 +452,13 @@ import { cameras } from '../data/cameras.js';
       const diffEl = entry.row.querySelector('.profile-diff');
 
       sizeEl.textContent = seconds > 0 ? formatSize(entry.size) : 'Set duration';
-      costEl.textContent = entry.size > 0 ? '$' + entry.cost.toFixed(2) : '$0.00';
+      costEl.textContent = entry.size > 0 ? `$${entry.cost.toFixed(2)}` : '$0.00';
 
       if (index === 0) {
         diffEl.textContent = 'Baseline';
         diffEl.dataset.trend = 'neutral';
       } else {
-        diffEl.textContent = seconds > 0 ? diffSign + diffPercent.toFixed(0) + '%' : '--';
+        diffEl.textContent = seconds > 0 ? `${diffSign}${diffPercent.toFixed(0)}%` : '--';
         diffEl.dataset.trend = diffPercent <= 0 ? 'positive' : 'negative';
       }
     });
@@ -458,29 +466,32 @@ import { cameras } from '../data/cameras.js';
     const maxSize = Math.max(...entries.map((entry) => entry.size), 0.001);
     barChart.innerHTML = entries.map((entry) => {
       const pct = Math.max(3, (entry.size / maxSize) * 100);
-      return `<div class="bar-row">
-        <div class="bar-label">${escapeHtml(entry.label)}</div>
-        <div class="bar-track">
-          <div class="bar-fill" style="width:${pct}%;background:${entry.color}">${seconds > 0 ? formatSize(entry.size) : 'Set duration'}</div>
+      return `<div class="mb-2.5 flex items-center gap-2 last:mb-0">
+        <div class="w-[100px] shrink-0 truncate text-right text-xs font-medium text-zinc-400 md:w-[160px] light:text-zinc-600">${escapeHtml(entry.label)}</div>
+          <div class="h-8 flex-1 overflow-hidden rounded-[10px] bg-zinc-800 light:bg-zinc-100">
+          <div class="flex h-full min-w-fit w-(--bar-width) items-center rounded-[10px] bg-(--bar-color) px-2.5 text-[11px] font-bold text-white transition-[width,opacity] duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)]" style="--bar-width:${pct}%;--bar-color:${entry.color}">${seconds > 0 ? formatSize(entry.size) : 'Set duration'}</div>
         </div>
       </div>`;
     }).join('');
 
     const speeds = [20, 100, 1000, 10000, customSpeed];
     uploadTable.innerHTML = entries.map((entry) => {
-      const cells = speeds.map((speed) => `<td>${entry.size > 0 ? formatDuration(uploadSeconds(entry.size, speed)) : '--'}</td>`).join('');
+      const cells = speeds.map(
+        (speed) => `<td class="border-t border-white/10 py-3.5 pr-3 text-zinc-400 tabular-nums light:border-zinc-200 light:text-zinc-600">${entry.size > 0 ? formatDuration(uploadSeconds(entry.size, speed)) : '--'}</td>`
+      ).join('');
+
       return `<tr>
-        <td>${escapeHtml(entry.label)}</td>
-        <td>${seconds > 0 ? formatSize(entry.size) : 'Set duration'}</td>
+        <td class="max-w-[150px] truncate border-t border-white/10 py-3.5 pr-3 font-semibold text-zinc-100 light:border-zinc-200 light:text-zinc-900">${escapeHtml(entry.label)}</td>
+        <td class="border-t border-white/10 py-3.5 pr-3 text-zinc-400 tabular-nums light:border-zinc-200 light:text-zinc-600">${seconds > 0 ? formatSize(entry.size) : 'Set duration'}</td>
         ${cells}
       </tr>`;
     }).join('');
 
     capacityResults.innerHTML = entries.map((entry) => {
       const recSec = entry.bitrate > 0 ? (storageGB * 8 * 1e9) / (entry.bitrate * 1e6) : 0;
-      return `<div class="capacity-row">
-        <span class="cap-label">${escapeHtml(entry.label)}</span>
-        <span class="cap-value">${storageGB > 0 ? formatDuration(recSec) : 'Add storage'}</span>
+      return `<div class="flex items-center justify-between gap-3 rounded-xl bg-zinc-800 px-2.5 py-2 text-xs light:bg-zinc-100">
+        <span class="truncate text-zinc-400 light:text-zinc-600">${escapeHtml(entry.label)}</span>
+        <span class="shrink-0 font-bold tabular-nums text-indigo-300 light:text-indigo-600">${storageGB > 0 ? formatDuration(recSec) : 'Add storage'}</span>
       </div>`;
     }).join('');
   }
@@ -648,8 +659,11 @@ import { cameras } from '../data/cameras.js';
 
   function showToast(message = 'Link copied to clipboard') {
     toastEl.textContent = message;
-    toastEl.classList.add('show');
-    window.setTimeout(() => toastEl.classList.remove('show'), 3000);
+    toastEl.dataset.visible = 'true';
+    window.clearTimeout(toastTimeoutId);
+    toastTimeoutId = window.setTimeout(() => {
+      toastEl.dataset.visible = 'false';
+    }, 3000);
   }
 
   function populateCameraSelect() {
@@ -676,7 +690,7 @@ import { cameras } from '../data/cameras.js';
     if (!camera) {
       codecSelect.value = '';
       hide(codecSelect);
-      hide(addCameraBtn);
+      hide(addCameraBtn, 'inline-flex');
       return;
     }
 
@@ -688,11 +702,11 @@ import { cameras } from '../data/cameras.js';
     });
 
     show(codecSelect);
-    hide(addCameraBtn);
+    hide(addCameraBtn, 'inline-flex');
   }
 
   themeToggle.addEventListener('click', () => {
-    const isLight = document.body.classList.contains('light-theme');
+    const isLight = document.documentElement.classList.contains('light-theme');
     applyTheme(isLight ? 'dark' : 'light');
   });
 
@@ -702,8 +716,8 @@ import { cameras } from '../data/cameras.js';
   cameraSelect.addEventListener('change', syncCodecSelect);
 
   codecSelect.addEventListener('change', () => {
-    if (codecSelect.value === '') hide(addCameraBtn);
-    else show(addCameraBtn);
+    if (codecSelect.value === '') hide(addCameraBtn, 'inline-flex');
+    else show(addCameraBtn, 'inline-flex');
   });
 
   addCameraBtn.addEventListener('click', () => {
@@ -718,7 +732,7 @@ import { cameras } from '../data/cameras.js';
     cameraSelect.value = '';
     codecSelect.value = '';
     hide(codecSelect);
-    hide(addCameraBtn);
+    hide(addCameraBtn, 'inline-flex');
     setMode('camera');
   });
 
@@ -729,6 +743,7 @@ import { cameras } from '../data/cameras.js';
       updateChipState(bitrate);
       manualBitrateEl.focus();
       manualBitrateEl.select();
+      validateManualProfile();
     });
   });
 
