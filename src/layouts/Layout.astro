@@ -9,7 +9,7 @@ interface Props {
 const { title } = Astro.props;
 const description = Astro.props.description ?? 'Compare video bitrates, file sizes, storage yield, and upload time with a fast static calculator.';
 const siteUrl = Astro.site ?? Astro.url;
-const baseUrl = import.meta.env.BASE_URL;
+const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
 const canonicalPath = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : `${Astro.url.pathname}/`;
 const canonicalUrl = new URL(canonicalPath, siteUrl).toString();
 const ogImageUrl = new URL(`${baseUrl}og-image.svg`, siteUrl).toString();
@@ -51,7 +51,7 @@ const manifestHref = `${baseUrl}manifest.json`;
       }
     </script>
 
-    <script is:inline define:vars={{ base: import.meta.env.BASE_URL }}>
+    <script is:inline define:vars={{ base: baseUrl }}>
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register(`${base}sw.js`, {
           scope: base,

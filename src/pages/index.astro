@@ -1,6 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import appScriptUrl from '../scripts/app.js?url';
 ---
 
 <Layout
@@ -267,5 +266,7 @@ import appScriptUrl from '../scripts/app.js?url';
     <div id="toast" class="pointer-events-none fixed right-4 bottom-4 translate-y-16 rounded-2xl border border-white/10 bg-zinc-900 px-4 py-3 text-sm font-medium text-zinc-100 opacity-0 shadow-2xl transition duration-200 data-[visible=true]:translate-y-0 data-[visible=true]:opacity-100 light:border-zinc-200 light:bg-white light:text-zinc-900" data-visible="false" aria-live="polite">Link copied to clipboard</div>
   </div>
 
-  <script type="module" src={appScriptUrl}></script>
+  <script>
+    import '../scripts/app.js';
+  </script>
 </Layout>
