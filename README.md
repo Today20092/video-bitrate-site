@@ -1,12 +1,13 @@
 # Video Bitrate Calculator - Astro Edition
 
-A modern video bitrate calculator built with Astro and Tailwind CSS for static deployment on GitHub Pages.
+A modern video bitrate calculator built with Astro, Tailwind CSS, and vanilla JavaScript for static deployment on GitHub Pages.
 
 ## Tech Stack
 
 - **Framework**: Astro 5.x (Static Site Generation)
 - **Styling**: Tailwind CSS 4
 - **Components**: Material Web Components 3
+- **Runtime**: Vanilla JavaScript client script
 - **Deployment**: GitHub Pages
 
 ## Project Structure
@@ -18,12 +19,15 @@ A modern video bitrate calculator built with Astro and Tailwind CSS for static d
 │   ├── layouts/
 │   │   └── Layout.astro         # Base layout template
 │   ├── scripts/
-│   │   └── script.js            # Application logic
+│   │   └── app.js               # Application logic
 │   └── styles/
-│       ├── globals.css          # Tailwind directives
-│       └── style.css            # Custom styles
+│       └── globals.css          # Tailwind directives and custom styles
 ├── public/
+│   ├── favicon.svg              # Site favicon
 │   ├── manifest.json            # PWA manifest
+│   ├── og-image.svg             # Social preview image
+│   ├── robots.txt               # Crawl directives
+│   ├── sitemap.xml              # Crawl index
 │   └── sw.js                    # Service Worker
 ├── dist/                        # Build output (auto-generated)
 ├── astro.config.mjs             # Astro configuration
@@ -85,10 +89,10 @@ Tailwind v4 is configured through `src/styles/globals.css` and the Vite plugin i
 
 ## Features
 
-- ✨ Fully static (no JavaScript runtime required)
+- ✨ Fully static with a single vanilla JS client script
 - 📱 Mobile responsive with Tailwind CSS
 - 🎨 Material Design 3 components
 - 🚀 Fast builds with Astro
-- 🔧 PWA ready with Service Worker
+- 🔧 PWA ready with Service Worker, manifest, and favicon
 - 📊 CSV export capability
 - 🌙 Dark mode support

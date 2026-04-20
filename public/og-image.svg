@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Bitrate Compare</title>
+  <desc id="desc">Social preview image for the video bitrate calculator.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#312e81" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#a78bfa" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)" />
+  <circle cx="1025" cy="120" r="210" fill="#6366f1" fill-opacity="0.14" />
+  <circle cx="165" cy="520" r="160" fill="#22c55e" fill-opacity="0.1" />
+  <rect x="88" y="88" width="1024" height="454" rx="40" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.12" />
+  <rect x="124" y="124" width="104" height="104" rx="24" fill="url(#accent)" />
+  <path d="M157 159h38a8 8 0 0 1 8 8v18a8 8 0 0 1-8 8h-38a8 8 0 0 1-8-8v-18a8 8 0 0 1 8-8Zm46 8 22-11v40l-22-11Z" fill="#fff" />
+  <text x="124" y="320" fill="#f8fafc" font-family="Inter, Arial, sans-serif" font-size="74" font-weight="700">Bitrate Compare</text>
+  <text x="124" y="386" fill="#cbd5e1" font-family="Inter, Arial, sans-serif" font-size="34">Compare bitrate, file size, storage yield, and upload time.</text>
+  <rect x="124" y="438" width="254" height="58" rx="29" fill="#6366f1" />
+  <text x="178" y="476" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="600">Static calculator</text>
+</svg>

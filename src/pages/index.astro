@@ -3,7 +3,10 @@ import Layout from '../layouts/Layout.astro';
 import appScriptUrl from '../scripts/app.js?url';
 ---
 
-<Layout title="Bitrate Compare — Video File Size Calculator">
+<Layout
+  title="Bitrate Compare — Video File Size Calculator"
+  description="Compare video bitrate profiles, file sizes, storage yield, and upload times in a fast static calculator built for production planning."
+>
   <div class="app-shell">
     <header class="header-bar">
       <div class="header-inner">
@@ -36,7 +39,7 @@ import appScriptUrl from '../scripts/app.js?url';
       </div>
     </header>
 
-    <main class="main-content">
+    <main id="main-content" class="main-content" tabindex="-1">
       <section class="hero-panel card">
         <div class="hero-copy">
           <span class="eyebrow">Production planning</span>
@@ -147,17 +150,22 @@ import appScriptUrl from '../scripts/app.js?url';
         </div>
         <div class="table-scroll profile-table-scroll">
           <table class="data-table profile-table">
+            <caption class="sr-only">Recorded profile comparison table</caption>
             <thead>
               <tr>
-                <th>Profile</th>
-                <th>Bitrate</th>
-                <th>Est. Size</th>
-                <th>Delta vs 1st</th>
-                <th>Media Cost</th>
-                <th>Actions</th>
+                <th scope="col">Profile</th>
+                <th scope="col">Bitrate</th>
+                <th scope="col">Est. Size</th>
+                <th scope="col">Delta vs 1st</th>
+                <th scope="col">Media Cost</th>
+                <th scope="col">Actions</th>
               </tr>
             </thead>
-            <tbody id="profilesContainer"></tbody>
+            <tbody id="profilesContainer">
+              <tr class="sr-only">
+                <td colspan="6">No profiles added yet.</td>
+              </tr>
+            </tbody>
           </table>
         </div>
         <p id="profilesEmpty" class="helper-text empty-state">No profiles yet. Add a camera preset or manual bitrate to compare file size, upload time, and storage yield.</p>
@@ -206,18 +214,23 @@ import appScriptUrl from '../scripts/app.js?url';
         <p class="helper-text section-intro">Use this to spot whether dailies, proxies, or mezzanine files can move in your available window.</p>
         <div class="table-scroll">
           <table class="data-table">
+            <caption class="sr-only">Upload estimate table</caption>
             <thead>
               <tr>
-                <th>Profile</th>
-                <th>Size</th>
-                <th>20M</th>
-                <th>100M</th>
-                <th>1G</th>
-                <th>10G</th>
-                <th id="customSpeedHeader">50M</th>
+                <th scope="col">Profile</th>
+                <th scope="col">Size</th>
+                <th scope="col">20M</th>
+                <th scope="col">100M</th>
+                <th scope="col">1G</th>
+                <th scope="col">10G</th>
+                <th scope="col" id="customSpeedHeader">50M</th>
               </tr>
             </thead>
-            <tbody id="uploadTable"></tbody>
+            <tbody id="uploadTable">
+              <tr class="sr-only">
+                <td colspan="7">Add profiles to see upload estimates.</td>
+              </tr>
+            </tbody>
           </table>
         </div>
       </section>

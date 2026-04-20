@@ -3,9 +3,15 @@ import '../styles/globals.css';
 
 interface Props {
   title: string;
+  description?: string;
 }
 
 const { title } = Astro.props;
+const description = Astro.props.description ?? 'Compare video bitrates, file sizes, storage yield, and upload time with a fast static calculator.';
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString();
+const ogImageUrl = new URL('og-image.svg', Astro.url).toString();
+const faviconHref = new URL('favicon.svg', Astro.url).pathname;
+const manifestHref = new URL('manifest.json', Astro.url).pathname;
 ---
 
 <!DOCTYPE html>
@@ -14,18 +20,37 @@ const { title } = Astro.props;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:type" content="image/svg+xml" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="icon" href={faviconHref} type="image/svg+xml" />
+    <link rel="manifest" href={manifestHref} />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet" />
 
-    <script is:inline>
+    <script is:inline define:vars={{ base: import.meta.env.BASE_URL }}>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register(new URL('sw.js', document.baseURI), { updateViaCache: 'none' });
+        navigator.serviceWorker.register(`${base}sw.js`, {
+          scope: base,
+          updateViaCache: 'none',
+        });
       }
     </script>
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
     <slot />
   </body>
 </html>
