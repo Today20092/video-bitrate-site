@@ -311,7 +311,8 @@ import { cameras } from '../data/cameras.js';
 
   function addStarterProfile(bitrate) {
     const safeBitrate = readBitrate(bitrate, 25);
-    addProfile(safeBitrate, createBitrateLabel(safeBitrate));
+    if (hasBitrate(safeBitrate)) return false;
+    return addProfile(safeBitrate, createBitrateLabel(safeBitrate));
   }
 
   function createProfileRow(id) {
@@ -833,14 +834,27 @@ import { cameras } from '../data/cameras.js';
       const bitrate = readBitrate(btn.dataset.starterBitrate, 25);
       manualBitrateEl.value = String(bitrate);
       updateChipState(bitrate);
-      addStarterProfile(bitrate);
-      setMessage(manualValidationEl, `${createBitrateLabel(bitrate)} added. Add more options or edit the row below.`, 'success');
+      if (addStarterProfile(bitrate)) {
+        setMessage(manualValidationEl, `${createBitrateLabel(bitrate)} added. Add more options or edit the row below.`, 'success');
+      } else {
+        setMessage(manualValidationEl, `${createBitrateLabel(bitrate)} is already in the comparison table.`, 'info');
+      }
     });
   });
 
   addStarterSetBtn?.addEventListener('click', () => {
-    [10, 25, 50, 100].forEach((bitrate) => addStarterProfile(bitrate));
-    setMessage(manualValidationEl, 'Starter set added. Compare the rows below or tune any bitrate inline.', 'success');
+    const starterBitrates = [10, 25, 50, 100];
+    const addedCount = starterBitrates.reduce((count, bitrate) => {
+      return addStarterProfile(bitrate) ? count + 1 : count;
+    }, 0);
+
+    setMessage(
+      manualValidationEl,
+      addedCount > 0
+        ? 'Starter set added. Compare the rows below or tune any bitrate inline.'
+        : 'Starter set is already in the comparison table.',
+      addedCount > 0 ? 'success' : 'info'
+    );
   });
 
   durationPresetButtons.forEach((btn) => {
