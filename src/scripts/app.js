@@ -53,6 +53,9 @@ import { cameras } from '../data/cameras.js';
     yieldStorageLabel: $('#yieldStorageLabel'),
     capacityResults: $('#capacityResults'),
     chipButtons: Array.from(document.querySelectorAll('[data-bitrate-chip]')),
+    starterButtons: Array.from(document.querySelectorAll('[data-starter-bitrate]')),
+    durationPresetButtons: Array.from(document.querySelectorAll('[data-duration-preset]')),
+    addStarterSetBtn: $('#addStarterSet'),
   };
 
   const required = [
@@ -108,6 +111,9 @@ import { cameras } from '../data/cameras.js';
     yieldStorageLabel,
     capacityResults,
     chipButtons,
+    starterButtons,
+    durationPresetButtons,
+    addStarterSetBtn,
   } = refs;
 
   function getVisibilityTarget(el) {
@@ -195,7 +201,7 @@ import { cameras } from '../data/cameras.js';
     setMessage(
       manualValidationEl,
       rawName
-        ? 'Ready to add. You can still rename and fine-tune bitrate after it appears in the comparison table.'
+        ? 'Ready to add. You can still rename and fine-tune it in the comparison table.'
         : 'Name is optional. A default label will be generated when you add the profile.',
       'success'
     );
@@ -223,12 +229,13 @@ import { cameras } from '../data/cameras.js';
   function setMode(mode) {
     const isCamera = mode === 'camera';
     cameraMode.hidden = !isCamera;
-    manualMode.hidden = isCamera;
     cameraMode.classList.toggle('hidden', !isCamera);
-    manualMode.classList.toggle('hidden', isCamera);
     modeCameraBtn.setAttribute('aria-selected', String(isCamera));
     modeManualBtn.setAttribute('aria-selected', String(!isCamera));
-    if (!isCamera) validateManualProfile();
+    if (!isCamera) {
+      manualBitrateEl.focus();
+      validateManualProfile();
+    }
   }
 
   function getTotalSeconds() {
@@ -236,6 +243,16 @@ import { cameras } from '../data/cameras.js';
     const minutes = Math.max(0, parseInt(minutesEl.value, 10) || 0);
     const seconds = Math.max(0, parseInt(secondsEl.value, 10) || 0);
     return hours * 3600 + minutes * 60 + seconds;
+  }
+
+  function syncDurationPresetButtons(totalSeconds = getTotalSeconds()) {
+    durationPresetButtons.forEach((btn) => {
+      const [hours, minutes, seconds] = (btn.dataset.durationPreset || '0,10,0')
+        .split(',')
+        .map((value) => Math.max(0, parseInt(value, 10) || 0));
+      const isActive = hours * 3600 + minutes * 60 + seconds === totalSeconds;
+      btn.setAttribute('aria-pressed', String(isActive));
+    });
   }
 
   function fileSizeGB(bitrateMbps, seconds) {
@@ -286,6 +303,15 @@ import { cameras } from '../data/cameras.js';
 
   function createDefaultProfileName() {
     return `Profile ${profiles.size + 1}`;
+  }
+
+  function createBitrateLabel(bitrate) {
+    return `${bitrate} Mbps`;
+  }
+
+  function addStarterProfile(bitrate) {
+    const safeBitrate = readBitrate(bitrate, 25);
+    addProfile(safeBitrate, createBitrateLabel(safeBitrate));
   }
 
   function createProfileRow(id) {
@@ -360,17 +386,26 @@ import { cameras } from '../data/cameras.js';
     bitrateInput.addEventListener('input', (event) => {
       const parsed = parseFloat(event.target.value);
       const invalid = !Number.isFinite(parsed) || parsed <= 0;
-      setInputInvalid(event.target, invalid);
-      profiles.get(id).bitrate = invalid ? profile.bitrate : parsed;
+      const duplicate = !invalid && hasBitrateExcept(parsed, id);
+      setInputInvalid(event.target, invalid || duplicate);
+      if (!invalid && !duplicate) {
+        profiles.get(id).bitrate = parsed;
+      }
       recalc();
       saveState();
     });
 
     bitrateInput.addEventListener('blur', (event) => {
       const safeBitrate = readBitrate(event.target.value, 100);
-      profiles.get(id).bitrate = safeBitrate;
-      event.target.value = String(safeBitrate);
-      setInputInvalid(event.target, false);
+      if (hasBitrateExcept(safeBitrate, id)) {
+        event.target.value = String(profiles.get(id).bitrate);
+        setInputInvalid(event.target, false);
+        showToast(`${safeBitrate} Mbps already exists`);
+      } else {
+        profiles.get(id).bitrate = safeBitrate;
+        event.target.value = String(safeBitrate);
+        setInputInvalid(event.target, false);
+      }
       recalc();
       saveState();
     });
@@ -387,10 +422,31 @@ import { cameras } from '../data/cameras.js';
     row._cells = { sizeCell, diffCell, costCell, removeBtn };
   }
 
+  function hasBitrate(bitrate) {
+    const target = readBitrate(bitrate);
+    for (const profile of profiles.values()) {
+      if (profile.bitrate === target) return true;
+    }
+    return false;
+  }
+
+  function hasBitrateExcept(bitrate, excludeId) {
+    const target = readBitrate(bitrate);
+    for (const [id, profile] of profiles.entries()) {
+      if (id !== excludeId && profile.bitrate === target) return true;
+    }
+    return false;
+  }
+
   function addProfile(bitrate, name, cameraId = null, codecIndex = null) {
+    const safeBitrate = readBitrate(bitrate);
+    if (hasBitrate(safeBitrate)) {
+      showToast(`${safeBitrate} Mbps already exists`);
+      return false;
+    }
     const id = ++profileIdCounter;
     profiles.set(id, {
-      bitrate: readBitrate(bitrate),
+      bitrate: safeBitrate,
       name: name?.trim() || createDefaultProfileName(),
       cameraId,
       codecIndex,
@@ -399,6 +455,7 @@ import { cameras } from '../data/cameras.js';
     updateVisibility();
     recalc();
     saveState();
+    return true;
   }
 
   function updateVisibility() {
@@ -417,13 +474,14 @@ import { cameras } from '../data/cameras.js';
     const customSpeed = Math.max(1, parseFloat(customSpeedEl.value) || 50);
 
     totalDurationEl.textContent = formatDurationShort(seconds);
+    syncDurationPresetButtons(seconds);
     customSpeedHeader.textContent = `${customSpeed}M`;
     yieldStorageLabel.textContent = `${storageGB} GB`;
 
     if (seconds === 0) {
       setMessage(profilesEmptyEl, 'Set a duration above 0 seconds to generate file sizes, upload times, and storage yield.', 'warning');
     } else if (profiles.size === 0) {
-      setMessage(profilesEmptyEl, 'No profiles yet. Add a camera preset or manual bitrate to compare file size, upload time, and storage yield.', 'info');
+      setMessage(profilesEmptyEl, 'No profiles yet. Add a bitrate profile or use the starter set to compare file size, upload time, and storage yield.', 'info');
     } else {
       setMessage(profilesEmptyEl, '', 'info');
     }
@@ -460,6 +518,7 @@ import { cameras } from '../data/cameras.js';
       const baselineSize = entries[0]?.size ?? 0;
       const diffPercent = baselineSize > 0 ? ((entry.size - baselineSize) / baselineSize) * 100 : 0;
       const diffSign = diffPercent >= 0 ? '+' : '';
+      const ratio = baselineSize > 0 ? entry.size / baselineSize : 0;
 
       const sizeEl = entry.row.querySelector('.profile-size');
       const costEl = entry.row.querySelector('.profile-cost');
@@ -472,7 +531,7 @@ import { cameras } from '../data/cameras.js';
         diffEl.textContent = 'Baseline';
         diffEl.dataset.trend = 'neutral';
       } else {
-        diffEl.textContent = seconds > 0 ? `${diffSign}${diffPercent.toFixed(0)}%` : '--';
+        diffEl.textContent = seconds > 0 ? `${diffSign}${diffPercent.toFixed(0)}% · ${ratio.toFixed(2)}x` : '--';
         diffEl.dataset.trend = diffPercent <= 0 ? 'positive' : 'negative';
       }
     });
@@ -480,10 +539,13 @@ import { cameras } from '../data/cameras.js';
     const maxSize = Math.max(...entries.map((entry) => entry.size), 0.001);
     barChart.innerHTML = entries.map((entry) => {
       const pct = Math.max(3, (entry.size / maxSize) * 100);
-      return `<div class="mb-2.5 flex items-center gap-2 last:mb-0">
-        <div class="w-[100px] shrink-0 truncate text-right text-xs font-medium text-zinc-400 md:w-[160px] light:text-zinc-600">${escapeHtml(entry.label)}</div>
-          <div class="h-8 flex-1 overflow-hidden rounded-[10px] bg-zinc-800 light:bg-zinc-100">
-          <div class="flex h-full min-w-fit w-(--bar-width) items-center rounded-[10px] bg-(--bar-color) px-2.5 text-[11px] font-bold text-white transition-[width,opacity] duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)]" style="--bar-width:${pct}%;--bar-color:${entry.color}">${seconds > 0 ? formatSize(entry.size) : 'Set duration'}</div>
+      return `<div class="mb-3 flex items-center gap-2 last:mb-0">
+        <div class="w-[110px] shrink-0 truncate text-right text-xs font-medium text-zinc-400 md:w-[180px] light:text-zinc-600">${escapeHtml(entry.label)}</div>
+          <div class="h-10 flex-1 overflow-hidden rounded-[12px] bg-zinc-800/80 light:bg-zinc-100">
+          <div class="flex h-full min-w-fit w-(--bar-width) items-center justify-between gap-2 rounded-[12px] bg-(--bar-color) px-3 text-[11px] font-bold text-white transition-[width,opacity] duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)]" style="--bar-width:${pct}%;--bar-color:${entry.color}">
+            <span class="truncate">${escapeHtml(entry.label)}</span>
+            <span>${seconds > 0 ? formatSize(entry.size) : 'Set duration'}</span>
+          </div>
         </div>
       </div>`;
     }).join('');
@@ -516,8 +578,11 @@ import { cameras } from '../data/cameras.js';
 
     capacityResults.innerHTML = entries.map((entry) => {
       const recSec = entry.bitrate > 0 ? (storageGB * 8 * 1e9) / (entry.bitrate * 1e6) : 0;
-      return `<div class="flex items-center justify-between gap-3 rounded-xl bg-zinc-800 px-2.5 py-2 text-xs light:bg-zinc-100">
-        <span class="truncate text-zinc-400 light:text-zinc-600">${escapeHtml(entry.label)}</span>
+      return `<div class="flex items-center justify-between gap-3 rounded-xl bg-zinc-800 px-3 py-2.5 text-xs light:bg-zinc-100">
+        <div class="min-w-0">
+          <span class="block truncate text-zinc-300 light:text-zinc-700">${escapeHtml(entry.label)}</span>
+          <span class="mt-0.5 block text-[11px] text-zinc-500 light:text-zinc-500">${escapeHtml(createBitrateLabel(entry.bitrate))}</span>
+        </div>
         <span class="shrink-0 font-bold tabular-nums text-indigo-300 light:text-indigo-600">${storageGB > 0 ? formatDuration(recSec) : 'Add storage'}</span>
       </div>`;
     }).join('');
@@ -763,6 +828,34 @@ import { cameras } from '../data/cameras.js';
     setMode('camera');
   });
 
+  starterButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const bitrate = readBitrate(btn.dataset.starterBitrate, 25);
+      manualBitrateEl.value = String(bitrate);
+      updateChipState(bitrate);
+      addStarterProfile(bitrate);
+      setMessage(manualValidationEl, `${createBitrateLabel(bitrate)} added. Add more options or edit the row below.`, 'success');
+    });
+  });
+
+  addStarterSetBtn?.addEventListener('click', () => {
+    [10, 25, 50, 100].forEach((bitrate) => addStarterProfile(bitrate));
+    setMessage(manualValidationEl, 'Starter set added. Compare the rows below or tune any bitrate inline.', 'success');
+  });
+
+  durationPresetButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const [hours, minutes, seconds] = (btn.dataset.durationPreset || '0,10,0')
+        .split(',')
+        .map((value) => Math.max(0, parseInt(value, 10) || 0));
+      hoursEl.value = String(hours);
+      minutesEl.value = String(minutes);
+      secondsEl.value = String(seconds);
+      recalc();
+      saveState();
+    });
+  });
+
   chipButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
       const bitrate = readBitrate(btn.dataset.bitrateChip, 100);
@@ -791,6 +884,7 @@ import { cameras } from '../data/cameras.js';
     manualBitrateEl.value = String(bitrate);
     addProfile(bitrate, name);
     manualNameEl.value = '';
+    updateChipState(bitrate);
     setMessage(manualValidationEl, 'Profile added. You can keep adding options or edit the new row below.', 'success');
   });
 
@@ -845,8 +939,8 @@ import { cameras } from '../data/cameras.js';
   );
 
   populateCameraSelect();
-  updateChipState(readBitrate(manualBitrateEl.value, 100));
-  setMode('camera');
+  updateChipState(readBitrate(manualBitrateEl.value, 25));
+  setMode('manual');
   validateManualProfile();
 
   const rawState = localStorage.getItem('vbc-state');
