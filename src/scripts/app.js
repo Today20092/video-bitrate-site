@@ -540,14 +540,12 @@ import { cameras } from '../data/cameras.js';
     const maxSize = Math.max(...entries.map((entry) => entry.size), 0.001);
     barChart.innerHTML = entries.map((entry) => {
       const pct = Math.max(3, (entry.size / maxSize) * 100);
-      return `<div class="mb-3 flex items-center gap-2 last:mb-0">
-        <div class="w-[110px] shrink-0 truncate text-right text-xs font-medium text-zinc-400 md:w-[180px] light:text-zinc-600">${escapeHtml(entry.label)}</div>
-          <div class="h-10 flex-1 overflow-hidden rounded-[12px] bg-zinc-800/80 light:bg-zinc-100">
-          <div class="flex h-full min-w-fit w-(--bar-width) items-center justify-between gap-2 rounded-[12px] bg-(--bar-color) px-3 text-[11px] font-bold text-white transition-[width,opacity] duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)]" style="--bar-width:${pct}%;--bar-color:${entry.color}">
-            <span class="truncate">${escapeHtml(entry.label)}</span>
-            <span>${seconds > 0 ? formatSize(entry.size) : 'Set duration'}</span>
-          </div>
+      return `<div class="bar-row">
+        <div class="bar-label">${escapeHtml(entry.label)}</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:${pct}%;--bar-color:${entry.color}" aria-hidden="true"></div>
         </div>
+        <div class="bar-value">${seconds > 0 ? formatSize(entry.size) : 'Set duration'}</div>
       </div>`;
     }).join('');
 
