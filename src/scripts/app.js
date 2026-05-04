@@ -7,8 +7,8 @@ import { cameras } from '../data/cameras.js';
   let toastTimeoutId = null;
 
   const chartColors = [
-    '#6366f1', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6',
-    '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16',
+    'var(--color-indigo-500)', 'var(--color-amber-500)', 'var(--color-emerald-500)', 'var(--color-rose-500)', 'var(--color-violet-500)',
+    'var(--color-pink-500)', 'var(--color-teal-500)', 'var(--color-orange-500)', 'var(--color-cyan-500)', 'var(--color-lime-500)',
   ];
   const uploadSpeeds = [
     { label: '20M', speed: 20 },
@@ -207,7 +207,7 @@ import { cameras } from '../data/cameras.js';
     );
 
     return {
-      name: rawName || createDefaultProfileName(),
+      name: rawName,
       bitrate: rawBitrate,
     };
   }
@@ -307,6 +307,13 @@ import { cameras } from '../data/cameras.js';
 
   function createBitrateLabel(bitrate) {
     return `${bitrate} Mbps`;
+  }
+
+  function isEditingProfileTable() {
+    return Boolean(
+      document.activeElement?.closest?.('#profilesContainer') &&
+      document.activeElement?.matches?.('.profile-name-input, .bitrate-input')
+    );
   }
 
   function addStarterProfile(bitrate) {
@@ -448,7 +455,7 @@ import { cameras } from '../data/cameras.js';
     const id = ++profileIdCounter;
     profiles.set(id, {
       bitrate: safeBitrate,
-      name: name?.trim() || createDefaultProfileName(),
+      name: name?.trim() || createBitrateLabel(safeBitrate),
       cameraId,
       codecIndex,
     });
@@ -513,8 +520,12 @@ import { cameras } from '../data/cameras.js';
       return a.id - b.id;
     });
 
+    const shouldReorderRows = !isEditingProfileTable();
+
     entries.forEach((entry, index) => {
-      container.appendChild(entry.row);
+      if (shouldReorderRows) {
+        container.appendChild(entry.row);
+      }
 
       const baselineSize = entries[0]?.size ?? 0;
       const diffPercent = baselineSize > 0 ? ((entry.size - baselineSize) / baselineSize) * 100 : 0;
