@@ -5,11 +5,11 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#FDFBFF",
-  "theme_color": "#6750A4",
+  "background_color": "rgb(250, 250, 250)",
+  "theme_color": "rgb(99, 102, 241)",
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%236750A4%22 rx=%2224%22/><text x=%2250%22 y=%2265%22 font-family=%22sans-serif%22 font-size=%2240%22 font-weight=%22bold%22 fill=%22white%22 text-anchor=%22middle%22>BR</text></svg>",
+      "src": "favicon.svg",
       "sizes": "192x192 512x512",
       "type": "image/svg+xml",
       "purpose": "any maskable"

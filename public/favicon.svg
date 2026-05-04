@@ -3,11 +3,11 @@
   <desc id="desc">A bold video camera icon for the bitrate calculator site.</desc>
   <defs>
     <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#6366f1" />
-      <stop offset="100%" stop-color="#8b5cf6" />
+      <stop offset="0%" stop-color="rgb(99, 102, 241)" />
+      <stop offset="100%" stop-color="rgb(139, 92, 246)" />
     </linearGradient>
   </defs>
   <rect width="64" height="64" rx="16" fill="url(#g)" />
-  <path d="M18 25h22a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4H18a4 4 0 0 1-4-4v-6a4 4 0 0 1 4-4Zm26 4 8-4v18l-8-4Z" fill="#fff" fill-opacity="0.95" />
-  <circle cx="28" cy="34" r="5" fill="#0f172a" fill-opacity="0.2" />
+  <path d="M18 25h22a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4H18a4 4 0 0 1-4-4v-6a4 4 0 0 1 4-4Zm26 4 8-4v18l-8-4Z" fill="white" fill-opacity="0.95" />
+  <circle cx="28" cy="34" r="5" fill="rgb(9, 9, 11)" fill-opacity="0.2" />
 </svg>
