@@ -10,11 +10,13 @@ import { cameras } from '../data/cameras.js';
     'var(--color-indigo-500)', 'var(--color-amber-500)', 'var(--color-emerald-500)', 'var(--color-rose-500)', 'var(--color-violet-500)',
     'var(--color-pink-500)', 'var(--color-teal-500)', 'var(--color-orange-500)', 'var(--color-cyan-500)', 'var(--color-lime-500)',
   ];
+  const uploadEfficiency = 0.85;
   const uploadSpeeds = [
-    { label: '20M', speed: 20 },
-    { label: '100M', speed: 100 },
-    { label: '1G', speed: 1000 },
-    { label: '10G', speed: 10000 },
+    { label: '100 Mbps', speed: 100 },
+    { label: '500 Mbps', speed: 500 },
+    { label: '1 Gbps', speed: 1000 },
+    { label: '2 Gbps', speed: 2000 },
+    { label: '10 Gbps', speed: 10000 },
   ];
 
   const refs = {
@@ -30,6 +32,7 @@ import { cameras } from '../data/cameras.js';
     container: $('#profilesContainer'),
     profilesEmptyEl: $('#profilesEmpty'),
     barChart: $('#barChart'),
+    uploadChart: $('#uploadChart'),
     uploadTable: $('#uploadTable'),
     themeToggle: $('#themeToggle'),
     shareConfigBtn: $('#shareConfig'),
@@ -61,7 +64,7 @@ import { cameras } from '../data/cameras.js';
   const required = [
     'hoursEl', 'minutesEl', 'secondsEl', 'costPerTBEl', 'availableStorageEl',
     'customSpeedEl', 'totalDurationEl', 'profileCountEl', 'customSpeedHeader',
-    'container', 'profilesEmptyEl', 'barChart', 'uploadTable', 'themeToggle',
+    'container', 'profilesEmptyEl', 'barChart', 'uploadChart', 'uploadTable', 'themeToggle',
     'shareConfigBtn', 'toastEl', 'cameraSelect', 'codecSelect', 'addCameraBtn',
     'modeCameraBtn', 'modeManualBtn', 'cameraMode', 'manualMode', 'manualNameEl',
     'manualBitrateEl', 'manualValidationEl', 'addManualBtn', 'clearAllBtn', 'comparisonSection',
@@ -88,6 +91,7 @@ import { cameras } from '../data/cameras.js';
     container,
     profilesEmptyEl,
     barChart,
+    uploadChart,
     uploadTable,
     themeToggle,
     shareConfigBtn,
@@ -290,8 +294,41 @@ import { cameras } from '../data/cameras.js';
     return parts.join(' ') || '0s';
   }
 
-  function uploadSeconds(sizeGB, speedMbps) {
-    return (sizeGB * 8 * 1e9) / (speedMbps * 1e6);
+  function formatUploadSpeed(speedMbps) {
+    const value = speedMbps >= 1000 ? speedMbps / 1000 : speedMbps;
+    const unit = speedMbps >= 1000 ? 'Gbps' : 'Mbps';
+    const formatted = Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/\.?0+$/, '');
+    return `${formatted} ${unit}`;
+  }
+
+  function uploadSeconds(sizeGB, speedMbps, efficiency = uploadEfficiency) {
+    const effectiveSpeedMbps = speedMbps * efficiency;
+    return (sizeGB * 8 * 1e9) / (effectiveSpeedMbps * 1e6);
+  }
+
+  function getFastestUploadItem(items) {
+    return items.reduce((fastest, item) => (
+      item.uploadTime < fastest.uploadTime ? item : fastest
+    ), items[0]);
+  }
+
+  function getSlowestUploadItem(items) {
+    return items.reduce((slowest, item) => (
+      item.uploadTime > slowest.uploadTime ? item : slowest
+    ), items[0]);
+  }
+
+  function getUploadBarPercent(uploadTime, maxTime) {
+    if (!Number.isFinite(uploadTime) || uploadTime <= 0) return 0;
+    return Math.max(2, Math.min(100, (uploadTime / Math.max(maxTime, 0.001)) * 100));
+  }
+
+  function formatUploadSpeedDetail(speedMbps) {
+    return `${formatUploadSpeed(speedMbps)} advertised, ${formatUploadSpeed(speedMbps * uploadEfficiency)} effective`;
+  }
+
+  function getUploadSpeedDetail(speedMbps) {
+    return formatUploadSpeedDetail(speedMbps);
   }
 
   function updateChipState(activeBitrate) {
@@ -483,7 +520,8 @@ import { cameras } from '../data/cameras.js';
 
     totalDurationEl.textContent = formatDurationShort(seconds);
     syncDurationPresetButtons(seconds);
-    customSpeedHeader.textContent = `${customSpeed}M`;
+    customSpeedHeader.textContent = 'Custom';
+    customSpeedHeader.title = getUploadSpeedDetail(customSpeed);
     yieldStorageLabel.textContent = `${storageGB} GB`;
 
     if (seconds === 0) {
@@ -560,16 +598,83 @@ import { cameras } from '../data/cameras.js';
       </div>`;
     }).join('');
 
-    const speedColumns = [...uploadSpeeds, { label: `${customSpeed}M`, speed: customSpeed }];
+    const speedColumns = [...uploadSpeeds, { label: 'Custom', speed: customSpeed, isCustom: true }];
+    const uploadLadder = speedColumns.map((speed) => {
+      const items = entries.map((entry) => ({
+        entry,
+        uploadTime: seconds > 0 ? uploadSeconds(entry.size, speed.speed) : 0,
+      }));
+      const maxTime = Math.max(...items.map((item) => item.uploadTime), 0.001);
+      const minItem = items.length ? getFastestUploadItem(items) : null;
+      const maxItem = items.length ? getSlowestUploadItem(items) : null;
+
+      return {
+        speed,
+        items,
+        maxTime,
+        minItem,
+        maxItem,
+      };
+    });
+
+    uploadChart.innerHTML = entries.length
+      ? uploadLadder.map((ladder) => {
+        const speedLabel = ladder.speed.isCustom ? 'Custom' : ladder.speed.label;
+        const advertisedLabel = ladder.speed.isCustom ? formatUploadSpeed(ladder.speed.speed) : '';
+        const effectiveLabel = `${formatUploadSpeed(ladder.speed.speed * uploadEfficiency)} effective`;
+        const hasOneProfile = ladder.items.length === 1;
+        const summaryLabel = seconds > 0
+          ? hasOneProfile
+            ? `Upload time: ${formatDuration(ladder.maxItem.uploadTime)}`
+            : `Fastest: ${ladder.minItem.entry.label} - ${formatDuration(ladder.minItem.uploadTime)} · Slowest: ${ladder.maxItem.entry.label} - ${formatDuration(ladder.maxItem.uploadTime)}`
+          : 'Set duration';
+        const summaryClass = seconds > 0 && ladder.maxItem
+          ? getUploadHeatClass(ladder.maxItem.uploadTime).replace('upload-heatmap-cell--', 'upload-ladder-summary--')
+          : 'upload-ladder-summary--idle';
+        const advertisedAria = ladder.speed.isCustom ? `${formatUploadSpeed(ladder.speed.speed)} advertised` : `${ladder.speed.label} advertised`;
+        const rowAria = `Upload times at ${advertisedAria}, ${formatUploadSpeed(ladder.speed.speed * uploadEfficiency)} effective`;
+        const bars = ladder.items.map((item) => {
+          const pct = seconds > 0 ? getUploadBarPercent(item.uploadTime, ladder.maxTime) : 0;
+          const timeLabel = seconds > 0 ? formatDuration(item.uploadTime) : 'Set duration';
+          const atSpeedLabel = ladder.speed.isCustom ? `Custom ${formatUploadSpeed(ladder.speed.speed)}` : ladder.speed.label;
+          const ariaLabel = `At ${atSpeedLabel}, ${item.entry.label} uploads in ${timeLabel}`;
+          return `<div class="upload-ladder-bar-row" aria-label="${escapeHtml(ariaLabel)}" title="${escapeHtml(ariaLabel)}">
+            <span class="upload-ladder-profile" title="${escapeHtml(item.entry.label)}">
+              <span class="upload-ladder-profile-name">${escapeHtml(item.entry.label)}</span>
+              <span class="upload-ladder-profile-bitrate">${escapeHtml(createBitrateLabel(item.entry.bitrate))}</span>
+            </span>
+            <span class="upload-ladder-track">
+              <span class="upload-ladder-fill ${pct > 0 ? 'upload-ladder-fill--visible' : ''}" style="width:${pct}%;--upload-bar-color:${item.entry.color}"></span>
+            </span>
+            <span class="upload-ladder-time">${escapeHtml(timeLabel)}</span>
+          </div>`;
+        }).join('');
+
+        return `<article class="upload-ladder-row" aria-label="${escapeHtml(rowAria)}">
+          <div class="upload-ladder-speed">
+            <div class="upload-ladder-speed-main">
+              <span class="upload-ladder-speed-label">${escapeHtml(speedLabel)}</span>
+              ${advertisedLabel ? `<span class="upload-ladder-advertised">${escapeHtml(advertisedLabel)} advertised</span>` : ''}
+            </div>
+            <span class="upload-ladder-effective">${escapeHtml(effectiveLabel)}</span>
+            <span class="upload-ladder-summary ${summaryClass}">${escapeHtml(summaryLabel)}</span>
+          </div>
+          <div class="upload-ladder-bars">${bars}</div>
+        </article>`;
+      }).join('')
+      : `<div class="upload-heatmap-empty">Add profiles to see upload estimates.</div>`;
+
     uploadTable.innerHTML = entries.length
       ? entries.map((entry) => {
         const cells = speedColumns.map((column) => {
           const uploadTime = seconds > 0 ? uploadSeconds(entry.size, column.speed) : 0;
           const heatClass = seconds > 0 ? getUploadHeatClass(uploadTime) : 'upload-heatmap-cell--idle';
           const timeLabel = seconds > 0 ? formatDuration(uploadTime) : 'Set duration';
-          const ariaLabel = `${entry.label} ${column.label} ${timeLabel}`;
+          const speedDetail = getUploadSpeedDetail(column.speed);
+          const ariaLabel = `${entry.label}, ${seconds > 0 ? formatSize(entry.size) : 'duration not set'} file, ${speedDetail}, upload time ${timeLabel}`;
           return `<div class="upload-heatmap-cell upload-heatmap-cell-speed ${heatClass}" role="cell" aria-label="${escapeHtml(ariaLabel)}" title="${escapeHtml(ariaLabel)}">
             <span class="upload-heatmap-rate">${escapeHtml(column.label)}</span>
+            ${column.isCustom ? `<span class="upload-heatmap-speed-detail">${escapeHtml(formatUploadSpeed(column.speed))}</span>` : ''}
             <span class="upload-heatmap-time">${escapeHtml(timeLabel)}</span>
           </div>`;
         }).join('');

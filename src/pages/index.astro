@@ -209,7 +209,7 @@ import Layout from '../layouts/Layout.astro';
                     <input id="costPerTB" name="costPerTB" type="number" class="w-full rounded-xl border border-white/10 bg-zinc-800 px-3 py-3 text-base font-medium text-zinc-100 outline-none transition placeholder:text-zinc-500 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 aria-invalid:border-rose-400 aria-invalid:ring-2 aria-invalid:ring-rose-500/20 light:border-zinc-200 light:bg-zinc-100 light:text-zinc-900 light:placeholder:text-zinc-400" value="20" min="0" step="0.01" inputmode="decimal" />
                   </div>
                   <div>
-                    <label class="mb-1.5 block text-[12px] font-semibold text-zinc-400 light:text-zinc-600" for="customSpeed">Custom Upload Speed (Mbps)</label>
+                    <label class="mb-1.5 block text-[12px] font-semibold text-zinc-400 light:text-zinc-600" for="customSpeed">Custom Upload Speed (advertised Mbps)</label>
                     <input id="customSpeed" name="customSpeed" type="number" class="w-full rounded-xl border border-white/10 bg-zinc-800 px-3 py-3 text-base font-medium text-zinc-100 outline-none transition placeholder:text-zinc-500 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 aria-invalid:border-rose-400 aria-invalid:ring-2 aria-invalid:ring-rose-500/20 light:border-zinc-200 light:bg-zinc-100 light:text-zinc-900 light:placeholder:text-zinc-400" value="50" min="1" step="1" inputmode="numeric" />
                   </div>
                 </div>
@@ -265,34 +265,39 @@ import Layout from '../layouts/Layout.astro';
 
         <section id="uploadSection" class="hidden rounded-[1.125rem] border border-white/10 bg-zinc-900 p-4 shadow-md light:border-zinc-200 light:bg-white">
           <div class="mb-2 flex items-start justify-between gap-3">
-            <span class="block text-[12px] font-bold uppercase tracking-[0.08em] text-zinc-400 light:text-zinc-500">Upload Estimates</span>
-            <span class="max-w-28 text-right text-xs font-semibold text-zinc-500 light:text-zinc-500 sm:max-w-none">Based on full file size</span>
+            <span class="block text-[12px] font-bold uppercase tracking-[0.08em] text-zinc-400 light:text-zinc-500">Upload Time by Internet Speed</span>
+            <span class="max-w-28 text-right text-xs font-semibold text-zinc-500 light:text-zinc-500 sm:max-w-none">85% effective speed</span>
           </div>
-          <p class="section-intro">Check whether each file can clear your transfer window at common upload speeds.</p>
+          <p class="section-intro">Compare how long each full file takes to upload across common internet plans. Estimates use 85% effective upload throughput to account for real-world overhead and imperfect sustained speeds.</p>
           <div class="upload-legend" aria-hidden="true">
             <span class="upload-legend-item"><span class="upload-legend-swatch upload-legend-swatch-fast"></span>Fast</span>
             <span class="upload-legend-item"><span class="upload-legend-swatch upload-legend-swatch-mid"></span>Moderate</span>
             <span class="upload-legend-item"><span class="upload-legend-swatch upload-legend-swatch-slow"></span>Slow</span>
             <span class="upload-legend-item"><span class="upload-legend-swatch upload-legend-swatch-very-slow"></span>Very slow</span>
           </div>
-          <div class="table-scroll upload-heatmap-scroll">
-            <div class="upload-heatmap" role="table" aria-label="Upload estimate heatmap">
-              <div class="upload-heatmap-head" role="rowgroup">
-                <div class="upload-heatmap-row upload-heatmap-row-head" role="row">
-                  <div class="upload-heatmap-cell upload-heatmap-cell-label" role="columnheader">Profile</div>
-                  <div class="upload-heatmap-cell upload-heatmap-cell-size" role="columnheader">Size</div>
-                  <div class="upload-heatmap-cell upload-heatmap-cell-speed" role="columnheader">20M</div>
-                  <div class="upload-heatmap-cell upload-heatmap-cell-speed" role="columnheader">100M</div>
-                  <div class="upload-heatmap-cell upload-heatmap-cell-speed" role="columnheader">1G</div>
-                  <div class="upload-heatmap-cell upload-heatmap-cell-speed" role="columnheader">10G</div>
-                  <div class="upload-heatmap-cell upload-heatmap-cell-speed" role="columnheader" id="customSpeedHeader">50M</div>
+          <div id="uploadChart" class="upload-ladder" aria-label="Speed ladder upload time comparison"></div>
+          <details class="upload-details">
+            <summary class="upload-details-summary">Exact upload time table</summary>
+            <div class="table-scroll upload-heatmap-scroll">
+              <div class="upload-heatmap" role="table" aria-label="Exact upload time table">
+                <div class="upload-heatmap-head" role="rowgroup">
+                  <div class="upload-heatmap-row upload-heatmap-row-head" role="row">
+                    <div class="upload-heatmap-cell upload-heatmap-cell-label" role="columnheader">Profile</div>
+                    <div class="upload-heatmap-cell upload-heatmap-cell-size" role="columnheader">Size</div>
+                    <div class="upload-heatmap-cell upload-heatmap-cell-speed" role="columnheader">100 Mbps</div>
+                    <div class="upload-heatmap-cell upload-heatmap-cell-speed" role="columnheader">500 Mbps</div>
+                    <div class="upload-heatmap-cell upload-heatmap-cell-speed" role="columnheader">1 Gbps</div>
+                    <div class="upload-heatmap-cell upload-heatmap-cell-speed" role="columnheader">2 Gbps</div>
+                    <div class="upload-heatmap-cell upload-heatmap-cell-speed" role="columnheader">10 Gbps</div>
+                    <div class="upload-heatmap-cell upload-heatmap-cell-speed" role="columnheader" id="customSpeedHeader">Custom</div>
+                  </div>
+                </div>
+                <div id="uploadTable" class="upload-heatmap-body" role="rowgroup">
+                  <div class="upload-heatmap-empty sr-only">Add profiles to see upload estimates.</div>
                 </div>
               </div>
-              <div id="uploadTable" class="upload-heatmap-body" role="rowgroup">
-                <div class="upload-heatmap-empty sr-only">Add profiles to see upload estimates.</div>
-              </div>
             </div>
-          </div>
+          </details>
         </section>
 
         <section id="yieldSection" class="hidden rounded-[1.125rem] border border-white/10 bg-zinc-900 p-4 shadow-md light:border-zinc-200 light:bg-white">
