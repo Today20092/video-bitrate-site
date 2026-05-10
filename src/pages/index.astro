@@ -199,7 +199,7 @@ import Layout from '../layouts/Layout.astro';
                   <span class="block text-[12px] font-bold uppercase tracking-[0.08em] text-zinc-400 light:text-zinc-500">Assumptions</span>
                   <span class="max-w-32 text-right text-xs font-semibold text-zinc-500 light:text-zinc-500 sm:max-w-none">Storage and transfer</span>
                 </div>
-                <div class="grid gap-2.5 md:grid-cols-3">
+                <div class="grid gap-2.5 md:grid-cols-2">
                   <div>
                     <label class="mb-1.5 block text-[12px] font-semibold text-zinc-400 light:text-zinc-600" for="availableStorage">Available Storage (GB)</label>
                     <input id="availableStorage" name="availableStorage" type="number" class="w-full rounded-xl border border-white/10 bg-zinc-800 px-3 py-3 text-base font-medium text-zinc-100 outline-none transition placeholder:text-zinc-500 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 aria-invalid:border-rose-400 aria-invalid:ring-2 aria-invalid:ring-rose-500/20 light:border-zinc-200 light:bg-zinc-100 light:text-zinc-900 light:placeholder:text-zinc-400" value="500" min="0" step="1" inputmode="numeric" />
@@ -208,12 +208,8 @@ import Layout from '../layouts/Layout.astro';
                     <label class="mb-1.5 block text-[12px] font-semibold text-zinc-400 light:text-zinc-600" for="costPerTB">Media Cost ($/TB)</label>
                     <input id="costPerTB" name="costPerTB" type="number" class="w-full rounded-xl border border-white/10 bg-zinc-800 px-3 py-3 text-base font-medium text-zinc-100 outline-none transition placeholder:text-zinc-500 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 aria-invalid:border-rose-400 aria-invalid:ring-2 aria-invalid:ring-rose-500/20 light:border-zinc-200 light:bg-zinc-100 light:text-zinc-900 light:placeholder:text-zinc-400" value="20" min="0" step="0.01" inputmode="decimal" />
                   </div>
-                  <div>
-                    <label class="mb-1.5 block text-[12px] font-semibold text-zinc-400 light:text-zinc-600" for="customSpeed">Custom Upload Speed (advertised Mbps)</label>
-                    <input id="customSpeed" name="customSpeed" type="number" class="w-full rounded-xl border border-white/10 bg-zinc-800 px-3 py-3 text-base font-medium text-zinc-100 outline-none transition placeholder:text-zinc-500 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 aria-invalid:border-rose-400 aria-invalid:ring-2 aria-invalid:ring-rose-500/20 light:border-zinc-200 light:bg-zinc-100 light:text-zinc-900 light:placeholder:text-zinc-400" value="50" min="1" step="1" inputmode="numeric" />
-                  </div>
                 </div>
-                <p id="settingsStatus" class="mt-1.5 text-xs leading-5 text-zinc-500 light:text-zinc-500">Uses decimal GB/TB and megabits per second for transfer speed.</p>
+                <p id="settingsStatus" class="mt-1.5 text-xs leading-5 text-zinc-500 light:text-zinc-500">Uses decimal GB/TB for storage and media cost estimates.</p>
               </div>
             </div>
           </section>
@@ -265,39 +261,18 @@ import Layout from '../layouts/Layout.astro';
 
         <section id="uploadSection" class="hidden rounded-[1.125rem] border border-white/10 bg-zinc-900 p-4 shadow-md light:border-zinc-200 light:bg-white">
           <div class="mb-2 flex items-start justify-between gap-3">
-            <span class="block text-[12px] font-bold uppercase tracking-[0.08em] text-zinc-400 light:text-zinc-500">Upload Time by Internet Speed</span>
-            <span class="max-w-28 text-right text-xs font-semibold text-zinc-500 light:text-zinc-500 sm:max-w-none">85% effective speed</span>
+            <span class="block text-[12px] font-bold uppercase tracking-[0.08em] text-zinc-400 light:text-zinc-500">Upload Time</span>
+            <span id="uploadEffectiveSpeed" class="max-w-40 text-right text-xs font-semibold text-zinc-500 light:text-zinc-500 sm:max-w-none">85% effective speed</span>
           </div>
-          <p class="section-intro">Compare how long each full file takes to upload across common internet plans. Estimates use 85% effective upload throughput to account for real-world overhead and imperfect sustained speeds.</p>
-          <div class="upload-legend" aria-hidden="true">
-            <span class="upload-legend-item"><span class="upload-legend-swatch upload-legend-swatch-fast"></span>Fast</span>
-            <span class="upload-legend-item"><span class="upload-legend-swatch upload-legend-swatch-mid"></span>Moderate</span>
-            <span class="upload-legend-item"><span class="upload-legend-swatch upload-legend-swatch-slow"></span>Slow</span>
-            <span class="upload-legend-item"><span class="upload-legend-swatch upload-legend-swatch-very-slow"></span>Very slow</span>
-          </div>
-          <div id="uploadChart" class="upload-ladder" aria-label="Speed ladder upload time comparison"></div>
-          <details class="upload-details">
-            <summary class="upload-details-summary">Exact upload time table</summary>
-            <div class="table-scroll upload-heatmap-scroll">
-              <div class="upload-heatmap" role="table" aria-label="Exact upload time table">
-                <div class="upload-heatmap-head" role="rowgroup">
-                  <div class="upload-heatmap-row upload-heatmap-row-head" role="row">
-                    <div class="upload-heatmap-cell upload-heatmap-cell-label" role="columnheader">Profile</div>
-                    <div class="upload-heatmap-cell upload-heatmap-cell-size" role="columnheader">Size</div>
-                    <div class="upload-heatmap-cell upload-heatmap-cell-speed" role="columnheader">100 Mbps</div>
-                    <div class="upload-heatmap-cell upload-heatmap-cell-speed" role="columnheader">500 Mbps</div>
-                    <div class="upload-heatmap-cell upload-heatmap-cell-speed" role="columnheader">1 Gbps</div>
-                    <div class="upload-heatmap-cell upload-heatmap-cell-speed" role="columnheader">2 Gbps</div>
-                    <div class="upload-heatmap-cell upload-heatmap-cell-speed" role="columnheader">10 Gbps</div>
-                    <div class="upload-heatmap-cell upload-heatmap-cell-speed" role="columnheader" id="customSpeedHeader">Custom</div>
-                  </div>
-                </div>
-                <div id="uploadTable" class="upload-heatmap-body" role="rowgroup">
-                  <div class="upload-heatmap-empty sr-only">Add profiles to see upload estimates.</div>
-                </div>
-              </div>
+          <p class="section-intro">Estimated time to upload each profile using your internet speed.</p>
+          <div class="upload-speed-control">
+            <label class="upload-speed-label" for="customSpeed">Your upload speed</label>
+            <div class="upload-speed-input-wrap">
+              <input id="customSpeed" name="customSpeed" type="number" class="upload-speed-input" value="50" min="1" step="1" inputmode="numeric" />
+              <span class="upload-speed-unit">Mbps</span>
             </div>
-          </details>
+          </div>
+          <div id="uploadChart" class="upload-bars" aria-label="Upload time by profile"></div>
         </section>
 
         <section id="yieldSection" class="hidden rounded-[1.125rem] border border-white/10 bg-zinc-900 p-4 shadow-md light:border-zinc-200 light:bg-white">

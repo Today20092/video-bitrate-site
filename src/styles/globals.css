@@ -39,233 +39,66 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  .upload-legend {
-    @apply mt-3 flex flex-wrap gap-x-3.5 gap-y-2.5;
+  .upload-speed-control {
+    @apply mb-4 grid gap-2.5 rounded-xl border border-white/10 bg-zinc-800/50 p-3 light:border-zinc-200 light:bg-zinc-50 sm:grid-cols-[minmax(0,1fr)_minmax(150px,220px)] sm:items-center;
   }
 
-  .upload-legend-item {
-    @apply inline-flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.02em] text-zinc-400 light:text-zinc-600;
+  .upload-speed-label {
+    @apply text-[12px] font-bold uppercase tracking-[0.08em] text-zinc-400 light:text-zinc-600;
   }
 
-  .upload-legend-swatch {
-    @apply size-2.5 rounded-full border border-white/10 light:border-zinc-200;
+  .upload-speed-input-wrap {
+    @apply flex min-h-11 items-center overflow-hidden rounded-xl border border-white/10 bg-zinc-950/45 focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-500/20 light:border-zinc-200 light:bg-white;
   }
 
-  .upload-legend-swatch-fast {
-    @apply bg-emerald-400 light:bg-emerald-500;
+  .upload-speed-input {
+    @apply min-w-0 flex-1 bg-transparent px-3 py-2.5 text-base font-bold tabular-nums text-zinc-100 outline-none light:text-zinc-900;
   }
 
-  .upload-legend-swatch-mid {
-    @apply bg-indigo-400 light:bg-indigo-500;
+  .upload-speed-unit {
+    @apply border-l border-white/10 px-3 text-xs font-bold uppercase tracking-[0.04em] text-zinc-500 light:border-zinc-200 light:text-zinc-500;
   }
 
-  .upload-legend-swatch-slow {
-    @apply bg-amber-400 light:bg-amber-500;
+  .upload-bars {
+    @apply mt-3 flex flex-col gap-2.5;
   }
 
-  .upload-legend-swatch-very-slow {
-    @apply bg-rose-400 light:bg-rose-500;
-  }
-
-  .upload-heatmap-scroll {
-    @apply mt-3;
-  }
-
-  .upload-ladder {
-    @apply mt-4 flex flex-col gap-3;
-  }
-
-  .upload-ladder-row {
-    @apply grid gap-3 rounded-2xl border border-white/10 bg-zinc-800/55 p-3.5 light:border-zinc-200 light:bg-zinc-50;
-  }
-
-  .upload-ladder-speed {
-    @apply flex min-w-0 flex-col gap-1.5;
-  }
-
-  .upload-ladder-speed-main {
-    @apply flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1;
-  }
-
-  .upload-ladder-speed-label {
-    @apply text-lg font-extrabold tracking-[-0.01em] text-zinc-100 light:text-zinc-900;
-  }
-
-  .upload-ladder-advertised {
-    @apply text-[12px] font-bold tabular-nums text-zinc-500 light:text-zinc-500;
-  }
-
-  .upload-ladder-effective {
-    @apply text-xs font-bold tabular-nums text-indigo-300 light:text-indigo-600;
-  }
-
-  .upload-ladder-summary {
-    @apply mt-1 inline-flex w-fit max-w-full items-center rounded-full border px-2.5 py-1 text-[12px] font-bold text-zinc-300 light:text-zinc-700;
-  }
-
-  .upload-ladder-summary--idle {
-    @apply border-white/10 bg-zinc-800 text-zinc-400 light:border-zinc-200 light:bg-zinc-100 light:text-zinc-600;
-  }
-
-  .upload-ladder-summary--fast {
-    @apply border-emerald-400/30 bg-emerald-500/10 text-emerald-300 light:border-emerald-200 light:bg-emerald-50 light:text-emerald-700;
-  }
-
-  .upload-ladder-summary--mid {
-    @apply border-indigo-400/30 bg-indigo-500/10 text-indigo-300 light:border-indigo-200 light:bg-indigo-50 light:text-indigo-700;
-  }
-
-  .upload-ladder-summary--slow {
-    @apply border-amber-400/35 bg-amber-500/10 text-amber-300 light:border-amber-200 light:bg-amber-50 light:text-amber-700;
-  }
-
-  .upload-ladder-summary--very-slow {
-    @apply border-rose-400/35 bg-rose-500/10 text-rose-300 light:border-rose-200 light:bg-rose-50 light:text-rose-700;
-  }
-
-  .upload-ladder-bars {
-    @apply flex min-w-0 flex-col gap-2;
-  }
-
-  .upload-ladder-bar-row {
+  .upload-bar-row {
     @apply grid min-w-0 items-center gap-2.5;
-    grid-template-columns: minmax(82px, 0.55fr) minmax(96px, 1fr) minmax(58px, auto);
+    grid-template-columns: minmax(92px, 92px) minmax(120px, 1fr) minmax(58px, auto);
   }
 
-  .upload-ladder-profile {
+  .upload-bar-profile {
     @apply min-w-0 text-[12px] font-bold text-zinc-400 light:text-zinc-600;
   }
 
-  .upload-ladder-profile-name,
-  .upload-ladder-profile-bitrate {
+  .upload-bar-name,
+  .upload-bar-bitrate {
     @apply block truncate;
   }
 
-  .upload-ladder-profile-bitrate {
+  .upload-bar-bitrate {
     @apply text-[11px] font-semibold text-zinc-500 light:text-zinc-500;
   }
 
-  .upload-ladder-track {
-    @apply h-6 overflow-hidden rounded-[10px] bg-zinc-950/55 ring-1 ring-white/5 light:bg-white light:ring-zinc-200;
+  .upload-bar-track {
+    @apply h-7 overflow-hidden rounded-[10px] bg-zinc-950/55 ring-1 ring-white/5 light:bg-white light:ring-zinc-200;
   }
 
-  .upload-ladder-fill {
+  .upload-bar-fill {
     @apply block h-full rounded-[10px] transition-[width] duration-300 ease-out;
-    background: linear-gradient(90deg, var(--upload-bar-color), color-mix(in srgb, var(--upload-bar-color) 55%, white));
+    background: linear-gradient(90deg, var(--upload-bar-color), color-mix(in srgb, var(--upload-bar-color) 58%, white));
   }
 
-  .upload-ladder-fill--visible {
+  .upload-bar-fill--visible {
     @apply min-w-1;
   }
 
-  .upload-ladder-time {
+  .upload-bar-time {
     @apply text-right text-xs font-extrabold tabular-nums text-zinc-200 light:text-zinc-800;
   }
 
-  .upload-details {
-    @apply mt-4 rounded-2xl border border-white/10 bg-zinc-800/35 light:border-zinc-200 light:bg-zinc-50;
-  }
-
-  .upload-details-summary {
-    @apply cursor-pointer list-none px-3.5 py-3 text-xs font-bold uppercase tracking-[0.06em] text-zinc-400 transition hover:text-zinc-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400 light:text-zinc-600 light:hover:text-zinc-900;
-  }
-
-  .upload-details-summary::-webkit-details-marker {
-    display: none;
-  }
-
-  .upload-details-summary::after {
-    content: "+";
-    @apply float-right text-sm leading-none text-zinc-500;
-  }
-
-  .upload-details[open] .upload-details-summary {
-    @apply border-b border-white/10 light:border-zinc-200;
-  }
-
-  .upload-details[open] .upload-details-summary::after {
-    content: "-";
-  }
-
-  .upload-heatmap {
-    @apply flex min-w-[1060px] flex-col gap-2.5 max-[719px]:min-w-0;
-  }
-
-  .upload-heatmap-body {
-    @apply flex flex-col gap-3.5;
-  }
-
-  .upload-heatmap-row {
-    @apply grid items-stretch gap-3 transition;
-    grid-template-columns: minmax(170px, 1.35fr) minmax(112px, 0.75fr) repeat(6, minmax(104px, 1fr));
-  }
-
-  .upload-heatmap-cell {
-    @apply flex min-h-[76px] flex-col justify-center gap-1 rounded-2xl border border-white/10 bg-zinc-800 px-3 py-3 text-zinc-100 transition light:border-zinc-200 light:bg-zinc-100 light:text-zinc-900;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .upload-heatmap-row:hover .upload-heatmap-cell {
-    @apply -translate-y-px border-white/20 shadow-lg shadow-black/10 light:border-zinc-300;
-  }
-
-  .upload-heatmap-row-head .upload-heatmap-cell {
-    @apply min-h-11 border-0 bg-transparent px-3 py-0 text-[12px] font-bold uppercase tracking-[0.06em] text-zinc-500 shadow-none light:bg-transparent light:text-zinc-500;
-  }
-
-  .upload-heatmap-cell-label {
-    @apply sticky left-0 z-10 bg-zinc-900 text-sm font-bold light:bg-white;
-  }
-
-  .upload-heatmap-name {
-    @apply block truncate text-sm font-bold;
-  }
-
-  .upload-heatmap-cell-size {
-    @apply text-sm font-bold text-indigo-300 light:text-indigo-600;
-  }
-
-  .upload-heatmap-cell-speed {
-    @apply items-start;
-  }
-
-  .upload-heatmap-rate {
-    @apply text-[12px] font-bold uppercase tracking-[0.08em] text-zinc-500;
-  }
-
-  .upload-heatmap-speed-detail {
-    @apply -mt-1 text-[11px] font-semibold text-zinc-500 light:text-zinc-600;
-  }
-
-  .upload-heatmap-time {
-    @apply text-base font-extrabold leading-none;
-  }
-
-  .upload-heatmap-cell--idle {
-    @apply bg-zinc-800/70 text-zinc-400 light:bg-zinc-100 light:text-zinc-600;
-  }
-
-  .upload-heatmap-cell--fast {
-    @apply border-emerald-400/40 bg-emerald-500/15 light:border-emerald-300 light:bg-emerald-50;
-  }
-
-  .upload-heatmap-cell--mid {
-    @apply border-indigo-400/40 bg-indigo-500/15 light:border-indigo-300 light:bg-indigo-50;
-  }
-
-  .upload-heatmap-cell--slow {
-    @apply border-amber-400/40 bg-amber-500/15 light:border-amber-300 light:bg-amber-50;
-  }
-
-  .upload-heatmap-cell--very-slow {
-    @apply border-rose-400/50 bg-rose-500/20 light:border-rose-300 light:bg-rose-50;
-  }
-
-  .upload-heatmap-cell--very-slow .upload-heatmap-time {
-    @apply text-rose-200 light:text-rose-700;
-  }
-
-  .upload-heatmap-empty {
+  .upload-empty {
     @apply px-0.5 pt-2.5 pb-1 text-xs text-zinc-500;
   }
 
@@ -274,7 +107,7 @@
   }
 
   .bar-label {
-    @apply w-[100px] shrink-0 truncate text-right text-xs font-medium text-zinc-400 light:text-zinc-600 min-[720px]:w-40 max-[719px]:w-[66px] max-[719px]:text-[11px];
+    @apply w-[82px] shrink-0 truncate text-right text-xs font-medium text-zinc-400 light:text-zinc-600 min-[720px]:w-[92px] max-[719px]:w-[66px] max-[719px]:text-[11px];
   }
 
   .bar-track {
@@ -290,82 +123,21 @@
     @apply w-[76px] shrink-0 text-right text-xs font-bold text-zinc-400 light:text-zinc-600 max-[719px]:w-[68px] max-[719px]:text-[11px];
   }
 
-  @media (min-width: 720px) {
-    .upload-ladder-row {
-      grid-template-columns: minmax(168px, 0.34fr) minmax(0, 1fr);
-      @apply items-start p-4;
-    }
-
-    .upload-ladder-speed {
-      @apply sticky top-16;
-    }
-
-    .upload-ladder-bar-row {
-      grid-template-columns: minmax(130px, 0.4fr) minmax(180px, 1fr) minmax(72px, auto);
-    }
-
-    .upload-ladder-track {
-      @apply h-7;
-    }
-  }
-
   @media (max-width: 719px) {
-    .upload-ladder-row {
-      @apply p-3;
-    }
-
-    .upload-ladder-bar-row {
-      grid-template-columns: minmax(74px, 0.48fr) minmax(78px, 1fr) minmax(52px, auto);
+    .upload-bar-row {
+      grid-template-columns: minmax(66px, 72px) minmax(76px, 1fr) minmax(52px, auto);
       @apply gap-2;
     }
 
-    .upload-ladder-speed-label {
-      @apply text-base;
-    }
-
-    .upload-ladder-summary {
-      @apply whitespace-normal rounded-xl leading-4;
-    }
-
-    .upload-ladder-profile,
-    .upload-ladder-time {
+    .upload-bar-profile,
+    .upload-bar-time {
       @apply text-[11px];
-    }
-
-    .upload-heatmap-row {
-      grid-template-columns: 1fr;
-    }
-
-    .upload-heatmap-row-head {
-      display: none;
-    }
-
-    .upload-heatmap-cell {
-      @apply min-h-0 px-3 py-2.5;
-    }
-
-    .upload-heatmap-cell-label {
-      @apply static;
-    }
-
-    .upload-heatmap-cell-size,
-    .upload-heatmap-cell-speed {
-      @apply flex-row items-center justify-between;
-    }
-
-    .upload-heatmap-cell-speed {
-      @apply flex-wrap gap-x-3 gap-y-1;
-    }
-
-    .upload-heatmap-time {
-      @apply text-right;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .bar-fill,
-    .upload-ladder-fill,
-    .upload-heatmap-cell {
+    .upload-bar-fill {
       transition: none;
     }
   }
