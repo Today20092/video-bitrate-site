@@ -579,11 +579,13 @@ import { cameras } from '../data/cameras.js';
       ? uploadEntries.map((entry) => {
         const pct = seconds > 0 ? getUploadBarPercent(entry.uploadTime, maxUploadTime) : 0;
         const timeLabel = seconds > 0 ? formatDuration(entry.uploadTime) : 'Set duration';
+        const bitrateLabel = createBitrateLabel(entry.bitrate);
+        const showBitrate = entry.label.trim().toLowerCase() !== bitrateLabel.toLowerCase();
         const ariaLabel = `${entry.label}, ${createBitrateLabel(entry.bitrate)}, uploads in ${timeLabel} at ${formatUploadSpeed(customSpeed)} advertised upload speed`;
         return `<div class="upload-bar-row" aria-label="${escapeHtml(ariaLabel)}" title="${escapeHtml(ariaLabel)}">
           <span class="upload-bar-profile" title="${escapeHtml(entry.label)}">
             <span class="upload-bar-name">${escapeHtml(entry.label)}</span>
-            <span class="upload-bar-bitrate">${escapeHtml(createBitrateLabel(entry.bitrate))}</span>
+            ${showBitrate ? `<span class="upload-bar-bitrate">${escapeHtml(bitrateLabel)}</span>` : ''}
           </span>
           <span class="upload-bar-track">
             <span class="upload-bar-fill ${pct > 0 ? 'upload-bar-fill--visible' : ''}" style="width:${pct}%;--upload-bar-color:${entry.color}"></span>
@@ -595,10 +597,12 @@ import { cameras } from '../data/cameras.js';
 
     capacityResults.innerHTML = entries.map((entry) => {
       const recSec = entry.bitrate > 0 ? (storageGB * 8 * 1e9) / (entry.bitrate * 1e6) : 0;
+      const bitrateLabel = createBitrateLabel(entry.bitrate);
+      const showBitrate = entry.label.trim().toLowerCase() !== bitrateLabel.toLowerCase();
       return `<div class="flex items-center justify-between gap-3 rounded-xl bg-zinc-800 px-3 py-2.5 text-xs light:bg-zinc-100">
         <div class="min-w-0">
           <span class="block truncate text-zinc-300 light:text-zinc-700">${escapeHtml(entry.label)}</span>
-          <span class="mt-0.5 block text-[11px] text-zinc-500 light:text-zinc-500">${escapeHtml(createBitrateLabel(entry.bitrate))}</span>
+          ${showBitrate ? `<span class="mt-0.5 block text-[11px] text-zinc-500 light:text-zinc-500">${escapeHtml(bitrateLabel)}</span>` : ''}
         </div>
         <span class="shrink-0 font-bold tabular-nums text-indigo-300 light:text-indigo-600">${storageGB > 0 ? formatDuration(recSec) : 'Add storage'}</span>
       </div>`;

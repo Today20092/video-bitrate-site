@@ -56,7 +56,7 @@
   }
 
   .upload-speed-unit {
-    @apply border-l border-white/10 px-3 text-xs font-bold uppercase tracking-[0.04em] text-zinc-500 light:border-zinc-200 light:text-zinc-500;
+    @apply border-l border-white/10 px-3 text-xs font-bold text-zinc-500 light:border-zinc-200 light:text-zinc-500;
   }
 
   .upload-bars {
@@ -116,7 +116,7 @@
 
   .bar-fill {
     @apply block h-full min-w-0 rounded-[10px] transition-[width,opacity] duration-300 ease-out max-[719px]:rounded-lg;
-    background: var(--bar-color);
+    background: linear-gradient(90deg, var(--bar-color), color-mix(in srgb, var(--bar-color) 58%, white));
   }
 
   .bar-value {
