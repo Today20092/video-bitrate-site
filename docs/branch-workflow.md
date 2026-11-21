@@ -4,9 +4,9 @@
 
 ## Work on a task
 
-1. Work in a worktree the host manages, based on current `origin/main`. A T3 Code thread on the main checkout moves itself with `t3_worktree_handoff` before editing; the project's worktree script runs `npm ci`. Without host worktree tools, use `git worktree add` and run `npm ci`.
+1. Work in a worktree the host manages, based on current `origin/main`. A T3 Code thread on the main checkout moves itself with `t3_worktree_handoff` before editing; the project's worktree script runs `pnpm install --frozen-lockfile`. Without host worktree tools, use `git worktree add` and run `pnpm install --frozen-lockfile`.
 2. Commit work in progress instead of using `git stash`: stashes are shared by every worktree.
-3. Make the change and run `npm run build`. There is no CI on pull requests, so report the build result in the PR.
+3. Make the change and run `pnpm build`. There is no CI on pull requests, so report the build result in the PR.
 4. End every code task with a commit and a pull request to `main`, without being asked. Opening a PR is safe; only a merge deploys the public GitHub Pages site.
 5. No checks run on the PR; run the build yourself before asking for a merge.
 6. Merge only when the user asks, with a merge commit.
