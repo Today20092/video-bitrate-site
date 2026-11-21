@@ -37,24 +37,24 @@ A modern video bitrate calculator built with Astro, Tailwind CSS, and vanilla Ja
 
 ### Install Dependencies
 ```bash
-npm install
+pnpm install
 ```
 
 ### Local Development
 ```bash
-npm run dev
+pnpm run dev
 ```
 Opens dev server at `http://localhost:3000`
 
 ### Build for Production
 ```bash
-npm run build
+pnpm run build
 ```
 Generates static site in `dist/` folder
 
 ### Preview Build
 ```bash
-npm run preview
+pnpm run preview
 ```
 
 ## Deployment
@@ -71,7 +71,7 @@ The deployment workflow is configured in `.github/workflows/deploy.yml`
 ### Manual Deployment
 
 ```bash
-npm run build
+pnpm run build
 # dist/ folder now contains the static site ready for deployment
 ```
 
